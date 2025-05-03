@@ -11,11 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.workshop1.R;
 import com.example.workshop1.SQLite.Mysqliteopenhelper;
@@ -131,8 +127,8 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        User user = new User(name, pwd);
-        long res = mysqliteopenhelper.register(user);
+        User user = new User(name, pwd, "", "student");
+        long res = mysqliteopenhelper.addUser(user);
         if (res != -1) {
             Toast.makeText(this, "Register Successfully!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, LoginActivity.class);

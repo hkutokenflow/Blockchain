@@ -8,4 +8,12 @@ public class EventItem {
         this.name = name;
         this.tokens = tokens;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getTokens() {
+        return tokens;
+    }
 }

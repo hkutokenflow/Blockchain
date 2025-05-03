@@ -42,46 +42,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="25sp"
             android:layout_marginBottom="10dp"
-            android:text="LOGIN"
+            android:gravity="center"
             android:textColor="@color/black"
-            android:gravity="center"/>
+            android:textSize="18sp" />
 
 
         <!-- RadioGroup for selecting user type -->
-        <RadioGroup
-            android:id="@+id/user_type_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp">
-
-            <RadioButton
-                android:id="@+id/radio_button_student"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Student"
-                android:textSize="18sp" />
-
-            <RadioButton
-                android:id="@+id/radio_button_vendor"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Vendor"
-                android:textSize="18sp" />
-
-            <RadioButton
-                android:id="@+id/radio_button_admin"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Admin"
-                android:textSize="18sp" />
-        </RadioGroup>
 
         <EditText
             android:id="@+id/et_login_name"
@@ -173,10 +140,18 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginLeft="15dp"
-                android:text="Remember the password"
+                android:text="Remember password"
                 android:textSize="15sp" />
 
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="1sp" />
 
         <Button
             android:id="@+id/btn_login"

@@ -1,6 +1,7 @@
 package com.example.workshop1.Vendor.Voucher;
 
 import android.app.AlertDialog;
+import android.database.Cursor;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,7 +15,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.workshop1.Admin.Vendor.VendorItem;
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
+import com.example.workshop1.SQLite.Reward;
+import com.example.workshop1.SQLite.User;
 import com.example.workshop1.Vendor.Voucher.VoucherItem;
 import com.example.workshop1.Vendor.Voucher.VoucherListAdapter;
 
@@ -28,48 +33,49 @@ public class EditVouchersFragment extends Fragment {
     private Button addButton;
     private List<VoucherItem> voucherList;
     private VoucherListAdapter adapter;
+    private Mysqliteopenhelper mysqliteopenhelper;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_edit_vouchers, container, false);
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+        mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
+
+        int vendorId = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+
 
         voucherListView = view.findViewById(R.id.voucher_list_view);
         addButton = view.findViewById(R.id.btn_add);
+        voucherList = new ArrayList<>();
 
-        // ----------------------------SQLite-----------------------------------
-        // -----------------------！！！！！！这里接数据库！！！！！！---------------------
-        // ----------------------------Adapter也需要根据后端进行调整-----------------------------------
-        // ###################注意：###################
-        // 增删改查，这里只有增，删和改在adapter
-
+        Cursor cursor = mysqliteopenhelper.getRewardsVendor(vendorId);
 
         //-------------------------ADD----------------------------------
-        addButton.setOnClickListener(v -> showAddVoucherDialog());
-        // 测试用假数据
-        voucherList = new ArrayList<>();
-        voucherList.add(new VoucherItem("Voucher 1", 20));
-        voucherList.add(new VoucherItem("Voucher 12", 35));
-        voucherList.add(new VoucherItem("Voucher 13", 35));
-        voucherList.add(new VoucherItem("Voucher 14", 35));
-        voucherList.add(new VoucherItem("Voucher 15", 35));
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(1);
+                String description = cursor.getString(2);
+                int value = cursor.getInt(3);
+                voucherList.add(new VoucherItem(name, description, value));
+            }
+        }
 
         //-------------------EDIT和DELETE都在这边----------------------
         adapter = new VoucherListAdapter(getContext(), voucherList);
         voucherListView.setAdapter(adapter);
 
-
-
+        addButton.setOnClickListener(v -> showAddVoucherDialog());
 
         return view;
     }
-
 
 
     private void showAddVoucherDialog() {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_voucher, null);
         EditText nameInput = dialogView.findViewById(R.id.et_voucher_name);
         EditText tokenInput = dialogView.findViewById(R.id.et_token_count);
+        EditText descInput = dialogView.findViewById(R.id.et_voucher_description);
         Button confirmButton = dialogView.findViewById(R.id.btn_confirm);
         Button cancelButton = dialogView.findViewById(R.id.btn_cancel);
 
@@ -81,17 +87,31 @@ public class EditVouchersFragment extends Fragment {
         confirmButton.setOnClickListener(v -> {
             String name = nameInput.getText().toString().trim();
             String tokenStr = tokenInput.getText().toString().trim();
+            String description = descInput.getText().toString().trim();
 
-            if (name.isEmpty() || tokenStr.isEmpty()) {
+            if (name.isEmpty() || tokenStr.isEmpty() || description.isEmpty()) {
                 Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             try {
                 int tokens = Integer.parseInt(tokenStr);
-                voucherList.add(new VoucherItem(name, tokens));
+
+                User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+                int vendorId = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+
+                Reward reward = new Reward(name, description, tokens, vendorId);
+                long res = mysqliteopenhelper.addReward(reward);
+                if (res != -1) {
+                    Toast.makeText(requireContext(), "Event added successfully!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "Failed to add event.", Toast.LENGTH_SHORT).show();
+                }
+
+                voucherList.add(new VoucherItem(name, description, tokens));
                 adapter.notifyDataSetChanged();
                 dialog.dismiss();
+
             } catch (NumberFormatException e) {
                 Toast.makeText(getContext(), "Token amount must be a number", Toast.LENGTH_SHORT).show();
             }

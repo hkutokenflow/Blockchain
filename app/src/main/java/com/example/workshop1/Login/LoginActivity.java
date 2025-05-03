@@ -12,20 +12,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 
 import com.example.workshop1.Admin.AdminActivity;
-import com.example.workshop1.MainActivity;
 import com.example.workshop1.R;
 import com.example.workshop1.SQLite.Mysqliteopenhelper;
+import com.example.workshop1.SQLite.User;
 import com.example.workshop1.Student.StudentActivity;
 import com.example.workshop1.Vendor.VendorActivity;
 
@@ -45,9 +40,6 @@ public class LoginActivity extends AppCompatActivity {
     private CheckBox remeberPass;
     private String account,password;
 
-    //用户选择
-    private RadioGroup userTypeGroup;  // RadioGroup to hold user types
-    private RadioButton radioButtonStudent, radioButtonVendor, radioButtonAdmin;  // RadioButtons for user types
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,14 +64,6 @@ public class LoginActivity extends AppCompatActivity {
         //记住密码
         pref= PreferenceManager.getDefaultSharedPreferences(this);
         remeberPass=(CheckBox)findViewById(R.id.remeber_pass);
-
-        // Initialize the RadioGroup and RadioButtons
-        userTypeGroup = findViewById(R.id.user_type_group);
-        radioButtonStudent = findViewById(R.id.radio_button_student);
-        radioButtonVendor = findViewById(R.id.radio_button_vendor);
-        radioButtonAdmin = findViewById(R.id.radio_button_admin);
-
-
 
     }
 
@@ -108,7 +92,7 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    //监听登陆按钮
+    // login button listener
     public void jumptoMainActivity(View view){
         account=et_name.getText().toString();
         password=et_password.getText().toString();
@@ -116,11 +100,11 @@ public class LoginActivity extends AppCompatActivity {
         //登陆按钮监听，验证码是否正确
         String phoneCode = et_phoneCode.getText().toString().toLowerCase();//大小写都行
         if (phoneCode.equals(realCode)) {
-            Toast.makeText(this, phoneCode + "Verification Code CORRECT", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, phoneCode + "Verification Code CORRECT", Toast.LENGTH_SHORT).show();
 
             //验证码正确之后再尝试登陆
-            boolean login_success=mysqliteopenhelper.login(account,password);
-            if(login_success){
+            User login_success = mysqliteopenhelper.login(account,password);
+            if(login_success != null){
                 //读取数据
                 editor=pref.edit();
                 if(remeberPass.isChecked()){
@@ -134,34 +118,42 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 editor.apply();
 
-                Toast.makeText(this,"Login successfully",Toast.LENGTH_SHORT).show();
+                /* for testing */
+                // mysqliteopenhelper.reset();
+
+                Toast.makeText(this,"Login successful",Toast.LENGTH_SHORT).show();
 
 
                 // -----------------------Jump to right activity----------------------
-                int selectedId = userTypeGroup.getCheckedRadioButtonId();
+                String type = login_success.getType();
 
                 Intent intent = null;
 
                 // Based on selected user type, go to the respective activity
-                if (selectedId == radioButtonStudent.getId()) {
-                    intent = new Intent(this, StudentActivity.class);  // Jump to StudentActivity
-                } else if (selectedId == radioButtonVendor.getId()) {
-                    intent = new Intent(this, VendorActivity.class);  // Jump to VendorActivity
-                } else if (selectedId == radioButtonAdmin.getId()) {
-                    intent = new Intent(this, AdminActivity.class);   // Jump to AdminActivity
-                } else {
-                    Toast.makeText(this, "Please select a valid user type", Toast.LENGTH_SHORT).show();
-                    return;
+                switch (type) {
+                    case "student":
+                        intent = new Intent(this, StudentActivity.class);  // Jump to StudentActivity
+                        break;
+                    case "vendor":
+                        intent = new Intent(this, VendorActivity.class);  // Jump to VendorActivity
+                        break;
+                    case "admin":
+                        intent = new Intent(this, AdminActivity.class);  // Jump to AdminActivity
+                        break;
+                    default:
+                        Toast.makeText(this, "user type invalid", Toast.LENGTH_SHORT).show();
+                        return;
                 }
 
+                intent.putExtra("userObj", login_success);
                 startActivity(intent);  // 登陆成功，跳转到对应的 Activity
 
             }
             else{
-                Toast.makeText(this,"Email or Password Error!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Incorrect email or password.",Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "Verification Code Error!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Verification code error!", Toast.LENGTH_SHORT).show();
         }
 
     }

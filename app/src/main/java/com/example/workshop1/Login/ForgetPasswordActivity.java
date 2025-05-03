@@ -5,23 +5,16 @@ import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.workshop1.R;
 import com.example.workshop1.SQLite.Mysqliteopenhelper;
 import com.example.workshop1.SQLite.User;
-
-import java.util.Random;
 
 public class ForgetPasswordActivity extends AppCompatActivity {
 
@@ -59,8 +52,8 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         String equal=et_equal.getText().toString();
 
         if(pwd.equals(equal)&&cb_accept.isChecked()){//两次密码相同而且已经选中了同意政策
-            User user=new User(name,pwd);
-            long res=mysqliteopenhelper.register(user);
+            User user = new User(name,pwd, "", "");
+            long res=mysqliteopenhelper.addUser(user);
             if(res!=-1){
                 Toast.makeText(this,"Register Successfully!",Toast.LENGTH_SHORT).show();
                 Intent intent=new Intent(this,LoginActivity.class);

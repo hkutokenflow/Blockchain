@@ -9,14 +9,20 @@
         android:id="@+id/et_voucher_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Voucher Name" />
+        android:hint="Voucher name" />
 
     <EditText
         android:id="@+id/et_token_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Token Count"
+        android:hint="Token value"
         android:inputType="number" />
+
+    <EditText
+        android:id="@+id/et_voucher_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Description" />
 
     <LinearLayout
         android:layout_marginTop="16dp"

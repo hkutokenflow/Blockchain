@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 
 
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class EventListAdapter extends ArrayAdapter<EventItem> {
 
     private Context context;
     private List<EventItem> eventList;
+    private Mysqliteopenhelper mysqliteopenhelper;
 
     public EventListAdapter(@NonNull Context context, List<EventItem> list) {
         super(context, 0, list);
@@ -43,11 +45,32 @@ public class EventListAdapter extends ArrayAdapter<EventItem> {
 
         TextView nameView = convertView.findViewById(R.id.tv_event_name);
         TextView tokenView = convertView.findViewById(R.id.tv_token_count);
+        ImageButton viewButton = convertView.findViewById(R.id.btn_view);
         ImageButton editButton = convertView.findViewById(R.id.btn_edit);
         ImageButton deleteButton = convertView.findViewById(R.id.btn_delete);
 
+        mysqliteopenhelper = new Mysqliteopenhelper(context);
+
         nameView.setText(currentEvent.name);
         tokenView.setText(currentEvent.tokens + " tokens");
+
+
+        //-------------------------------VIEW-------------------------------------
+        viewButton.setOnClickListener(v -> {
+            String description = currentEvent.getName();
+            int reward = currentEvent.getTokens();
+
+            int eventId = mysqliteopenhelper.getEventId(description, reward);
+
+            // Create and show a dialog to display the username and password
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle(description);
+            builder.setMessage("Event ID: " + eventId);
+            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+            builder.show();
+        });
+
+
 
         //-------------------------------EDIT-------------------------------------
         editButton.setOnClickListener(v -> {
@@ -60,6 +83,7 @@ public class EventListAdapter extends ArrayAdapter<EventItem> {
                     .setTitle("Delete Event")
                     .setMessage("Are you sure you want to delete \"" + currentEvent.name + "\"?")
                     .setPositiveButton("Delete", (dialog, which) -> {
+                        mysqliteopenhelper.deleteEvent(currentEvent.getName(), currentEvent.getTokens());
                         eventList.remove(position);
                         notifyDataSetChanged();
                         Toast.makeText(context, "Event deleted", Toast.LENGTH_SHORT).show();
@@ -79,10 +103,14 @@ public class EventListAdapter extends ArrayAdapter<EventItem> {
         EditText etTokens = dialogView.findViewById(R.id.et_token_count);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
         Button btnConfirm = dialogView.findViewById(R.id.btn_confirm);
+        mysqliteopenhelper = new Mysqliteopenhelper(context);
 
         // 设置原有值
         etName.setText(event.name);
         etTokens.setText(String.valueOf(event.tokens));
+
+        String orgName = event.name;
+        int orgTokens = event.tokens;
 
         AlertDialog dialog = new AlertDialog.Builder(context)
                 .setView(dialogView)
@@ -103,6 +131,8 @@ public class EventListAdapter extends ArrayAdapter<EventItem> {
             int newTokens = Integer.parseInt(tokenStr);
 
             // 更新 event 数据
+            mysqliteopenhelper.editEvent(newName, newTokens, orgName, orgTokens);
+
             event.name = newName;
             event.tokens = newTokens;
 

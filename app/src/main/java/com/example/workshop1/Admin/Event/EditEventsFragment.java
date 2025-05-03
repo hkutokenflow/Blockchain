@@ -1,6 +1,7 @@
 package com.example.workshop1.Admin.Event;
 
 import android.app.AlertDialog;
+import android.database.Cursor;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,7 +15,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.workshop1.Admin.Vendor.VendorItem;
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Event;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,7 @@ public class EditEventsFragment extends Fragment {
     private Button addButton;
     private List<EventItem> eventList;
     private EventListAdapter adapter;
+    private Mysqliteopenhelper mysqliteopenhelper;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -34,6 +39,9 @@ public class EditEventsFragment extends Fragment {
 
         eventListView = view.findViewById(R.id.event_list_view);
         addButton = view.findViewById(R.id.btn_add);
+        eventList = new ArrayList<>();
+
+        //-------------------------ADD----------------------------------
 
         // ----------------------------SQLite-----------------------------------
         // -----------------------！！！！！！这里接数据库！！！！！！---------------------
@@ -41,27 +49,32 @@ public class EditEventsFragment extends Fragment {
         // ###################注意：###################
         // 增删改查，这里只有增，删和改在adapter
 
-
-        //-------------------------ADD----------------------------------
-        addButton.setOnClickListener(v -> showAddEventDialog());
-        // 测试用假数据
-        eventList = new ArrayList<>();
-        eventList.add(new EventItem("Orientation Day", 20));
-        eventList.add(new EventItem("Blockchain Talk", 35));
-        eventList.add(new EventItem("Inno Show", 35));
-        eventList.add(new EventItem("Career talk", 35));
-        eventList.add(new EventItem("CS Talk", 35));
+        mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
+        Cursor cursor = mysqliteopenhelper.getEvents();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(1);
+                int tokens = cursor.getInt(2);
+                eventList.add(new EventItem(name, tokens));
+            }
+        }
 
         //-------------------EDIT和DELETE都在这边----------------------
         adapter = new EventListAdapter(getContext(), eventList);
         eventListView.setAdapter(adapter);
 
-
-
+        addButton.setOnClickListener(v -> showAddEventDialog());
 
         return view;
-    }
 
+        /* 测试用假数据
+        eventList.add(new EventItem("Orientation Day", 20));
+        eventList.add(new EventItem("Blockchain Talk", 35));
+        eventList.add(new EventItem("Inno Show", 35));
+        eventList.add(new EventItem("Career talk", 35));
+        eventList.add(new EventItem("CS Talk", 35)); */
+
+    }
 
 
     private void showAddEventDialog() {
@@ -87,6 +100,14 @@ public class EditEventsFragment extends Fragment {
 
             try {
                 int tokens = Integer.parseInt(tokenStr);
+                Event event = new Event(name, tokens);
+                long res = mysqliteopenhelper.addEvent(event);
+                if (res != -1) {
+                    Toast.makeText(requireContext(), "Event added successfully!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "Failed to add event.", Toast.LENGTH_SHORT).show();
+                }
+
                 eventList.add(new EventItem(name, tokens));
                 adapter.notifyDataSetChanged();
                 dialog.dismiss();
