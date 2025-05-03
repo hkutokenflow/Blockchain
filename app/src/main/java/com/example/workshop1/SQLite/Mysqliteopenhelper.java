@@ -94,7 +94,6 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         return null;  // unsuccessful login
     }
 
-
     // ------------------ USER ------------------
     // get user id from username and password
     public int getUserId(String username, String pwd) {
@@ -131,11 +130,11 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     }
 
     // edit vendor password
-    public void editVendorPwd(String pwd, String username) {
+    public void editVendorPwd(String name, String pwd) {
         SQLiteDatabase db1 = getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("password", pwd);
-        db1.update("Users", cv, "username = ?", new String[] {username});
+        db1.update("Users", cv, "username = ?", new String[] {name});
     }
 
     // delete vendor
@@ -268,6 +267,12 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         }
     }
 
+    // get reward obj from rid
+    public Cursor getRewardFromId(int rid) {
+        SQLiteDatabase db1 = getWritableDatabase();
+        return db1.query("Rewards", null, "rid = ?", new String[] {String.valueOf(rid)}, null, null, null);
+    }
+
 
 
     // ------------------ TRANSACTIONS ------------------
@@ -339,6 +344,18 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         contentValues.put("rid", sr.getRid());
 
         db.insert("StudentRewards",null, contentValues);
+    }
+
+    // Delete student-reward record (use reward voucher)
+    public void deleteStudentReward(int uid, int rid) {
+        SQLiteDatabase db1 = getWritableDatabase();
+        db1.delete("StudentRewards", "uid = ? AND rid = ?", new String[] {String.valueOf(uid), String.valueOf(rid)});
+    }
+
+    // Get student reward records by student uid
+    public Cursor getStudentRewards(int uid) {
+        SQLiteDatabase db1 = getWritableDatabase();
+        return db1.query("StudentRewards", null, "uid = ?", new String[]{String.valueOf(uid)}, null, null, null);
     }
 
 

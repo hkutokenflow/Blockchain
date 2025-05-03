@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.example.workshop1.R;
 import com.example.workshop1.SQLite.Mysqliteopenhelper;
 import com.example.workshop1.Login.EmailSender;
+import com.example.workshop1.SQLite.User;
 
 import java.util.Random;
 
@@ -75,6 +76,9 @@ public class changeVendorPasswordFragment extends Fragment {
         String equal = et_equal.getText().toString();
 
         //------------------------------------SQL---------------------------------------
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+        mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
+        mysqliteopenhelper.editVendorPwd(thisUser.getUsername(), pwd);
         //-----------------------------Update Password here---------------------------------------
 
         // TODO: update password in database
