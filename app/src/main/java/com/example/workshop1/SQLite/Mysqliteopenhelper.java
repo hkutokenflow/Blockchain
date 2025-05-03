@@ -270,7 +270,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get reward obj from rid
     public Cursor getRewardFromId(int rid) {
         SQLiteDatabase db1 = getWritableDatabase();
-        return db1.query("Rewards", null, "rid = ?", new String[] {String.valueOf(rid)}, null, null, null);
+        return db1.query("Rewards", null, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
     }
 
 

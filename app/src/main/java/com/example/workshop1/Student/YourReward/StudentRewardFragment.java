@@ -47,28 +47,23 @@ public class StudentRewardFragment extends Fragment {
         Cursor cursor = mysqliteopenhelper.getStudentRewards(uid);
         Log.d("YourRewards", "student rewards count:" + cursor.getCount());
         if (cursor.getCount() != 0) {
-            int rid = cursor.getInt(2);
-            Cursor res = mysqliteopenhelper.getRewardFromId(rid);
-            if (res.getCount() != 0) {
-                res.moveToNext();
-                String r_name = cursor.getString(1);
-                String r_desc = cursor.getString(2);
-                int r_value = cursor.getInt(3);
-                int r_uid = cursor.getInt(4);
-                rewardList.add(new StudentRewardItem(r_name));
+            while(cursor.moveToNext()) {
+                int rid = cursor.getInt(2);
+                Log.d("YourRewards", "rid (_id):" + rid);
+                Cursor res = mysqliteopenhelper.getRewardFromId(rid);
+                if (res.getCount() != 0) {
+                    res.moveToNext();
+                    String r_name = res.getString(1);
+                    String r_desc = res.getString(2);
+                    int r_value = res.getInt(3);
+                    int r_uid = res.getInt(4);
+                    rewardList.add(new StudentRewardItem(r_name, r_desc, r_value, r_uid));
+                }
             }
         }
 
-
-        /*// 测试用假数据
-        rewardList.add(new StudentRewardItem("Voucher 1"));
-        rewardList.add(new StudentRewardItem("Voucher 1"));
-        rewardList.add(new StudentRewardItem("Voucher 1"));
-        rewardList.add(new StudentRewardItem("Voucher 1"));
-        rewardList.add(new StudentRewardItem("Voucher 1"));*/
-
         //-------------------DELETE(use)在这边----------------------
-        adapter = new StudentRewardListAdapter(getContext(), rewardList);
+        adapter = new StudentRewardListAdapter(getContext(), rewardList, thisUser);
         rewardListView.setAdapter(adapter);
 
 
