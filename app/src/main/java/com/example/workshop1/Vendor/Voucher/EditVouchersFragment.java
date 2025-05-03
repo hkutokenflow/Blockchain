@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,12 +40,13 @@ public class EditVouchersFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_edit_vouchers, container, false);
+
         User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
 
         mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
 
         int vendorId = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
-
+        Log.d("editReward", "vendor id" + vendorId);
 
         voucherListView = view.findViewById(R.id.voucher_list_view);
         addButton = view.findViewById(R.id.btn_add);
@@ -52,13 +54,11 @@ public class EditVouchersFragment extends Fragment {
 
         //-------------------------ADD----------------------------------
         Cursor cursor = mysqliteopenhelper.getRewardsVendor(vendorId);
-        if (cursor.getCount() != 0) {
-            while (cursor.moveToNext()) {
-                String name = cursor.getString(1);
-                String description = cursor.getString(2);
-                int value = cursor.getInt(3);
-                voucherList.add(new VoucherItem(name, description, value));
-            }
+        if (cursor != null && cursor.moveToNext()) {
+            String name = cursor.getString(1);
+            String description = cursor.getString(2);
+            int value = cursor.getInt(3);
+            voucherList.add(new VoucherItem(name, description, value));
         }
 
         //-------------------EDIT和DELETE都在这边----------------------
@@ -98,14 +98,18 @@ public class EditVouchersFragment extends Fragment {
                 int tokens = Integer.parseInt(tokenStr);
 
                 User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+                Log.d("CreateReward", thisUser.getUsername());
+                Log.d("CreateReward", thisUser.getPassword());
+
                 int vendorId = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+                Log.d("CreateReward", "vendor id " + vendorId);
 
                 Reward reward = new Reward(name, description, tokens, vendorId);
                 long res = mysqliteopenhelper.addReward(reward);
                 if (res != -1) {
-                    Toast.makeText(requireContext(), "Event added successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Reward added successfully!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(requireContext(), "Failed to add event.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Failed to add reward.", Toast.LENGTH_SHORT).show();
                 }
 
                 voucherList.add(new VoucherItem(name, description, tokens));

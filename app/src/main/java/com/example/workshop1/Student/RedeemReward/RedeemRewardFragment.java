@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ public class RedeemRewardFragment extends Fragment {
                 String description = cursor.getString(2);
                 int value = cursor.getInt(3);
                 int uid = cursor.getInt(4);
+                Log.d("RedeemRewardsFrag", "Reward uid " + uid);
                 rewards.add(new RewardItem(name, description, value, uid));
             }
         }

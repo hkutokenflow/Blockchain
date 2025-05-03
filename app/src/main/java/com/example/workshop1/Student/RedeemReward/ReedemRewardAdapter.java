@@ -62,7 +62,6 @@ public class ReedemRewardAdapter extends RecyclerView.Adapter<ReedemRewardAdapte
     }
 
 
-
     private void showRewardDialog(Context context, RewardItem reward) {
         Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_reward_description);
@@ -80,16 +79,21 @@ public class ReedemRewardAdapter extends RecyclerView.Adapter<ReedemRewardAdapte
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnConfirm.setOnClickListener(v -> {
-            // Check if balance is enough
-            Log.d("RedeemRewards", "User balance" + thisUser.getBalance());
-            Log.d("RedeemRewards", "Reward cost" + reward.tokens);
-            if (thisUser.getBalance() >= reward.tokens) {
+            mysqliteopenhelper = new Mysqliteopenhelper(context);
 
-                mysqliteopenhelper = new Mysqliteopenhelper(context);
+            // Get the user's current balance from the database
+            int sid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(sid);
+
+            // Check if balance is enough
+            Log.d("RedeemRewards", "User balance " + currentBalance);
+            Log.d("RedeemRewards", "Reward cost " + reward.tokens);
+            if (currentBalance >= reward.tokens) {
 
                 // Add record into StudentRewards
                 int rewardId = mysqliteopenhelper.getRewardId(reward.title, reward.description, reward.tokens, reward.uid);
-                int sid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+                Log.d("Redeem Voucher", "rewardId: " + rewardId);
+                Log.d("Redeem Voucher", "reward uid: " + reward.uid);
                 StudentReward sr = new StudentReward(sid, rewardId);
                 mysqliteopenhelper.addStudentReward(sr);
 
@@ -101,6 +105,7 @@ public class ReedemRewardAdapter extends RecyclerView.Adapter<ReedemRewardAdapte
                 String formattedDateTime = sdf.format(calendar.getTime());
                 Transaction trans = new Transaction(formattedDateTime, sid,  reward.uid, reward.tokens, rewardId, "r");
                 mysqliteopenhelper.addTransaction(trans);
+                thisUser.setBalance(currentBalance - reward.tokens);
 
                 Toast.makeText(context, "Reward Redeemed!", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();

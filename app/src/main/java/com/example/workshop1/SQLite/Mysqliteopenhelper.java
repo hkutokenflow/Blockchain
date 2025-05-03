@@ -58,6 +58,12 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         // Create admin account
         String addAdmin = "INSERT INTO Users VALUES(1, 'admin', 'admin123','HKU TokenFlow Admin', 'admin', 0)";
         db.execSQL(addAdmin);
+        /*String addVendor1 = "INSERT INTO Users VALUES(2, 'vendor1', 'vendor123','vender1 name', 'vendor', 0)";
+        db.execSQL(addVendor1);
+        String addVendor2 = "INSERT INTO Users VALUES(3, 'vendor2', 'vendor123','vender2 name', 'vendor', 0)";
+        db.execSQL(addVendor2);
+        String addStudent = "INSERT INTO Users VALUES(4, 'student', 'student123','student', 'student', 0)";
+        db.execSQL(addStudent);*/
 
     }
 
@@ -130,8 +136,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     public String getUserType(int uid) {
         SQLiteDatabase db1 = getWritableDatabase();
         Cursor cur = db1.query("Users", new String[]{"type"}, "_id = ?", new String[] {String.valueOf(uid)}, null, null, null);
-        if (cur.getCount() != 0) {
-            cur.moveToNext();
+        if (cur != null && cur.moveToNext()) {
             String type =  cur.getString(0);
             if (type.equals("admin")) {
                 return "(a)";
@@ -149,7 +154,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get vendor list
     public Cursor getVendors() {
         SQLiteDatabase db1 = getWritableDatabase();
-        return db1.query("Users", null, "type like?", new String[]{"vendor"}, null, null, null);
+        return db1.query("Users", null, "type like?", new String[]{"vendor"}, null, null, "name");
     }
 
     // edit vendor name
@@ -188,7 +193,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get current events list
     public Cursor getEvents() {
         SQLiteDatabase db1 = getWritableDatabase();
-        return db1.query("Events", null, null, null, null, null, null);
+        return db1.query("Events", null, null, null, null, null, "description");
     }
 
     // edit event name
@@ -205,8 +210,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     public int getEventId(String orgName, int orgToken) {
         SQLiteDatabase db1 = getWritableDatabase();
         Cursor id =  db1.query("EventsA", new String[]{"_id"}, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)}, null, null, null);
-        if (id != null) {
-            id.moveToFirst();
+        if (id != null && id.moveToFirst()) {
             return id.getInt(0);
         } else {
             return -999;
@@ -217,8 +221,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     public int getEventReward(int eid) {
         SQLiteDatabase db1 = getWritableDatabase();
         Cursor reward =  db1.query("EventsA", new String[]{"reward"}, "_id = ?", new String[] {String.valueOf(eid)}, null, null, null);
-        if (reward != null) {
-            reward.moveToFirst();
+        if (reward != null && reward.moveToFirst()) {
             return reward.getInt(0);
         } else {
             return -999;
@@ -229,8 +232,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     public String getEventName(int eid) {
         SQLiteDatabase db1 = getWritableDatabase();
         Cursor desc =  db1.query("EventsA", new String[]{"description"}, "_id = ?", new String[] {String.valueOf(eid)}, null, null, null);
-        if (desc != null) {
-            desc.moveToFirst();
+        if (desc != null && desc.moveToFirst()) {
             return desc.getString(0);
         } else {
             return "";
@@ -343,30 +345,38 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     }
 
     // Add transaction
-    public long addTransaction(Transaction trans){
+    public void addTransaction(Transaction trans){
         SQLiteDatabase db = this.getWritableDatabase();
         SQLiteDatabase db1 = this.getReadableDatabase();
 
         // update Users balances
         String sourceUid = String.valueOf(trans.getSource());
         Cursor cursor = db1.rawQuery("SELECT balance FROM Users WHERE _id = ?", new String[]{sourceUid});
-        cursor.moveToFirst();
-        int sourceBalance = cursor.getInt(0);
-        int newSourceBalance = sourceBalance - trans.getAmount();
-        ContentValues cvSrc = new ContentValues();
-        cvSrc.put("balance", newSourceBalance);
-        db.update("Users", cvSrc, "_id = ?", new String[] {sourceUid});
-        Log.d("SQL", "source balance updated");
+        if (cursor != null && cursor.moveToFirst()) {
+            int sourceBalance = cursor.getInt(0);
+            int newSourceBalance = sourceBalance - trans.getAmount();
+            ContentValues cvSrc = new ContentValues();
+            cvSrc.put("balance", newSourceBalance);
+            db.update("Users", cvSrc, "_id = ?", new String[] {sourceUid});
+            Log.d("SQL", "source balance updated");
+        } else {
+            Log.d("SQL", "source user not found");
+        }
+        cursor.close();
 
         String destUid = String.valueOf(trans.getDestination());
         Cursor cursor1 = db1.rawQuery("SELECT balance FROM Users WHERE _id = ?", new String[]{destUid});
-        cursor1.moveToFirst();
-        int destBalance = cursor1.getInt(0);
-        int newDestBalance = destBalance + trans.getAmount();
-        ContentValues cvDest = new ContentValues();
-        cvDest.put("balance", newDestBalance);
-        db.update("Users", cvDest, "_id = ?", new String[] {destUid});
-        Log.d("SQL", "dest balance updated");
+        if (cursor1 != null && cursor1.moveToFirst()) {
+            int destBalance = cursor1.getInt(0);
+            int newDestBalance = destBalance + trans.getAmount();
+            ContentValues cvDest = new ContentValues();
+            cvDest.put("balance", newDestBalance);
+            db.update("Users", cvDest, "_id = ?", new String[] {destUid});
+            Log.d("SQL", "dest balance updated");
+        } else {
+            Log.d("SQL", "dest user not found");
+        }
+        cursor1.close();
 
         // Add row to Transactions
         ContentValues contentValues = new ContentValues();
@@ -376,7 +386,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         contentValues.put("amount", trans.getAmount());
         contentValues.put("erid", trans.getErid());
         contentValues.put("ttype", trans.getTtype());
-        return db.insert("Transactions",null, contentValues);
+        db.insert("Transactions",null, contentValues);
     }
 
     // Get all transactions
@@ -384,7 +394,6 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         SQLiteDatabase db1 = getWritableDatabase();
         return db1.query("Transactions", null, null, null, null, null, "datetime DESC");
     }
-
 
 
     // ------------------ STUDENTREWARDS ------------------
@@ -411,14 +420,52 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         return db1.query("StudentRewards", null, "uid = ?", new String[]{String.valueOf(uid)}, null, null, null);
     }
 
+    // ------------------ OTHERS ------------------
+    // get balance of user at time of call
+    public int getUserBalance(int userId) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query("Users", new String[]{"balance"}, "_id = ?", new String[]{String.valueOf(userId)}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int balance = cursor.getInt(0);
+            cursor.close();
+            return balance;
+        } else {
+            if (cursor != null) {
+                cursor.close();
+            }
+            return 0; // Default or handle error
+        }
+    }
 
-    // ------------------ Delete all transactions + reset balance for testing ----------------
+    // get total number of transactions
+    public int countTrans() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor allRows = db.query("Transactions", null, null, null, null, null, null);
+        if (allRows != null) {
+            return allRows.getCount();
+        } else {
+            return 0;
+        }
+    }
+
+
+    // ------------------ Delete all for testing (except users) ----------------
     public void reset() {
         SQLiteDatabase db = this.getWritableDatabase();
         String deleteAllTransactions = "DELETE FROM Transactions";
         db.execSQL(deleteAllTransactions);
         String resetBalances = "UPDATE Users SET balance =" + 0;
         db.execSQL(resetBalances);
+        String deleteAllSR = "DELETE FROM StudentRewards";
+        db.execSQL(deleteAllSR);
+        String deleteAllEvents = "DELETE FROM Events";
+        db.execSQL(deleteAllEvents);
+        String deleteAllEventsA = "DELETE FROM EventsA";
+        db.execSQL(deleteAllEventsA);
+        String deleteAllRewards = "DELETE FROM Rewards";
+        db.execSQL(deleteAllRewards);
+        String deleteAllRewardsA = "DELETE FROM RewardsA";
+        db.execSQL(deleteAllRewardsA);
     }
 
 }

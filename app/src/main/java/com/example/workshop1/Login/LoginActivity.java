@@ -47,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mysqliteopenhelper=new Mysqliteopenhelper(this);
+        /* for testing */
+        //mysqliteopenhelper.reset();
 
         et_name=findViewById(R.id.et_login_name);
         et_password=findViewById(R.id.et_login_password);
@@ -117,9 +119,6 @@ public class LoginActivity extends AppCompatActivity {
                     editor.clear();
                 }
                 editor.apply();
-
-                /* for testing */
-                // mysqliteopenhelper.reset();
 
                 Toast.makeText(this,"Login successful",Toast.LENGTH_SHORT).show();
 

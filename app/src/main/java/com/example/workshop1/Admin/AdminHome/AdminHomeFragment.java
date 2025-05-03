@@ -12,6 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
+import com.example.workshop1.SQLite.User;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -34,17 +36,29 @@ public class AdminHomeFragment extends Fragment {
     private BarChart transactionsChart;
     private Spinner chartTimeRangeSpinner;
     private String selectedRange = "Weekly";
+    private Mysqliteopenhelper mysqliteopenhelper;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_admin_home, container, false);
 
-        // 初始化 UI 元素
+        mysqliteopenhelper = new Mysqliteopenhelper(getContext());
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+
         totalTokensText = root.findViewById(R.id.total_tokens_value);
+        if (thisUser != null) {
+            int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(uid);
+            totalTokensText.setText(String.valueOf(-currentBalance));
+        } else {
+            totalTokensText.setText("Balance not available");
+        }
+
         totalTransactionsText = root.findViewById(R.id.total_transactions_value);
-        totalTokensText.setText("1,234");
-        totalTransactionsText.setText("567");
+        int count = mysqliteopenhelper.countTrans();
+        totalTransactionsText.setText(String.valueOf(count));
+
 
         tokensMinedChart = root.findViewById(R.id.tokens_mined_chart);
         transactionsChart = root.findViewById(R.id.transactions_chart);
@@ -67,6 +81,20 @@ public class AdminHomeFragment extends Fragment {
 
         return root;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+        if (thisUser != null) {
+            int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(uid);
+            totalTokensText.setText(String.valueOf(-currentBalance));
+        }
+        int count = mysqliteopenhelper.countTrans();
+        totalTransactionsText.setText(String.valueOf(count));
+    }
+
 
     // 设置 Tokens Mined 的折线图
     private void setupTokensMinedChart() {

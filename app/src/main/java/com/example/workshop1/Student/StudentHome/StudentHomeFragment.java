@@ -57,7 +57,10 @@ public class StudentHomeFragment extends Fragment {
         // wallet balance
         studentWalletText = root.findViewById(R.id.student_wallet_balance);
         if (thisUser != null) {
-            studentWalletText.setText(String.valueOf(thisUser.getBalance()));
+            int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(uid);
+            studentWalletText.setText(String.valueOf(currentBalance));
+            // studentWalletText.setText(String.valueOf(thisUser.getBalance()));
         } else {
             studentWalletText.setText("Balance not available");
         }
@@ -109,17 +112,15 @@ public class StudentHomeFragment extends Fragment {
         return root;
     }
 
-
-    //-----------------------------------transaction--------------------------------
-    // --------------------------------ADD:SQLite--------------------------------
-    // 静态数据
-    private void setupDummyData() {
-        allTransactions.clear();
-        allTransactions.add(new Transaction("2025-04-25", "Inno Show", "+500.00"));
-        allTransactions.add(new Transaction("2025-04-26", "Career talk", "-200.00"));
-        allTransactions.add(new Transaction("2025-04-27", "Career Fair",  "-350.00"));
-        allTransactions.add(new Transaction("2025-04-28", "Event 3", "+150.00"));
-        allTransactions.add(new Transaction("2025-04-29", "Event 4", "-420.00"));
+    @Override
+    public void onResume() {
+        super.onResume();
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+        if (thisUser != null) {
+            int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(uid);
+            studentWalletText.setText(String.valueOf(currentBalance));
+        }
     }
 
     private void displayTransactions(List<Transaction> transactions) {

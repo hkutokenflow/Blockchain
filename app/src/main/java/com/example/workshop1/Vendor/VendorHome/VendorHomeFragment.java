@@ -57,7 +57,13 @@ public class VendorHomeFragment extends Fragment {
 
         // wallet balance
         vendorWalletText = root.findViewById(R.id.vendor_wallet_balance);
-        vendorWalletText.setText("1,234");
+        if (thisUser != null) {
+            int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(uid);
+            vendorWalletText.setText(String.valueOf(currentBalance));
+        } else {
+            vendorWalletText.setText("Balance not available");
+        }
 
         //barchart
         vendorTransactionsChart = root.findViewById(R.id.transactions_chart);
@@ -80,7 +86,6 @@ public class VendorHomeFragment extends Fragment {
         transactionsTable = root.findViewById(R.id.recent_transactions_table);
         searchEditText = root.findViewById(R.id.transaction_search);
 
-        // setupDummyData(); // SQLite
         int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
         Cursor cursor = mysqliteopenhelper.getUserTrans(uid);
         if (cursor.getCount() != 0) {
@@ -134,6 +139,17 @@ public class VendorHomeFragment extends Fragment {
 
         vendorTransactionsChart.setData(barData);
         configureBarChart(vendorTransactionsChart);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+        if (thisUser != null) {
+            int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+            int currentBalance = mysqliteopenhelper.getUserBalance(uid);
+            vendorWalletText.setText(String.valueOf(currentBalance));
+        }
     }
 
 
