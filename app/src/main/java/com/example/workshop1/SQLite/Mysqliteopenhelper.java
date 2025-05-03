@@ -14,7 +14,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     private static final String DBNAME="Mydb";
 
     public Mysqliteopenhelper(@Nullable Context context) {
-        super(context, DBNAME, null, 7);
+        super(context, DBNAME, null, 8);
     }
 
     @Override
@@ -43,6 +43,18 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
                 "rid INTEGER REFERENCES Rewards(_id))";
         db.execSQL(createStudentRewards);
 
+
+        // Archive tables for events and rewards
+        String createRewardsA = "CREATE TABLE RewardsA (_id INTEGER PRIMARY KEY, " +
+                "name varchar(255), description varchar(1000), value INTEGER," +
+                "uid INTEGER REFERENCES Users(_id))";
+        db.execSQL(createRewardsA);
+
+        String createEventsA = "CREATE TABLE EventsA (_id INTEGER PRIMARY KEY, " +
+                "description varchar(2000), reward INTEGER)";
+        db.execSQL(createEventsA);
+
+
         // Create admin account
         String addAdmin = "INSERT INTO Users VALUES(1, 'admin', 'admin123','HKU TokenFlow Admin', 'admin', 0)";
         db.execSQL(addAdmin);
@@ -57,6 +69,8 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS Rewards;");
         db.execSQL("DROP TABLE IF EXISTS Events;");
         db.execSQL("DROP TABLE IF EXISTS StudentRewards;");
+        db.execSQL("DROP TABLE IF EXISTS RewardsA;");
+        db.execSQL("DROP TABLE IF EXISTS EventsA;");
 
         // Call onCreate to recreate the tables
         onCreate(db);
@@ -167,10 +181,11 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("description", event.getDescription());
         contentValues.put("reward", event.getReward());
+        db.insert("EventsA",null, contentValues);
         return db.insert("Events",null, contentValues);
     }
 
-    // get events list
+    // get current events list
     public Cursor getEvents() {
         SQLiteDatabase db1 = getWritableDatabase();
         return db1.query("Events", null, null, null, null, null, null);
@@ -183,12 +198,13 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         cv.put("description", newName);
         cv.put("reward", newToken);
         db1.update("Events", cv, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)});
+        db1.update("EventsA", cv, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)});
     }
 
     // get event id from description and reward
     public int getEventId(String orgName, int orgToken) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor id =  db1.query("Events", new String[]{"_id"}, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)}, null, null, null);
+        Cursor id =  db1.query("EventsA", new String[]{"_id"}, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)}, null, null, null);
         if (id != null) {
             id.moveToFirst();
             return id.getInt(0);
@@ -200,7 +216,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get event reward from eid
     public int getEventReward(int eid) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor reward =  db1.query("Events", new String[]{"reward"}, "_id = ?", new String[] {String.valueOf(eid)}, null, null, null);
+        Cursor reward =  db1.query("EventsA", new String[]{"reward"}, "_id = ?", new String[] {String.valueOf(eid)}, null, null, null);
         if (reward != null) {
             reward.moveToFirst();
             return reward.getInt(0);
@@ -212,7 +228,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get event name from eid
     public String getEventName(int eid) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor desc =  db1.query("Events", new String[]{"description"}, "_id = ?", new String[] {String.valueOf(eid)}, null, null, null);
+        Cursor desc =  db1.query("EventsA", new String[]{"description"}, "_id = ?", new String[] {String.valueOf(eid)}, null, null, null);
         if (desc != null) {
             desc.moveToFirst();
             return desc.getString(0);
@@ -229,20 +245,19 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
 
 
     // ------------------ REWARDS ------------------
-    // get full rewards list
+    // get full current rewards list
     public Cursor getRewardsAll() {
         SQLiteDatabase db1 = getWritableDatabase();
         return db1.query("Rewards", null, null, null, null, null, null);
     }
 
-
-    // get rewards list by vendor
+    // get current rewards list by vendor
     public Cursor getRewardsVendor(int uid) {
         SQLiteDatabase db1 = getWritableDatabase();
         return db1.query("Rewards", null, "uid = ?", new String[]{String.valueOf(uid)}, null, null, null);
     }
 
-    // Add event
+    // Add reward
     public long addReward(Reward reward){
         SQLiteDatabase db=getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -250,6 +265,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         contentValues.put("description", reward.getDescription());
         contentValues.put("value", reward.getValue());
         contentValues.put("uid", reward.getUid());
+        db.insert("RewardsA",null, contentValues);
         return db.insert("Rewards",null, contentValues);
     }
 
@@ -261,6 +277,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         cv.put("description", newDesc);
         cv.put("value", newToken);
         db1.update("Rewards", cv, "name = ? AND description = ?", new String[] {orgName, orgDesc});
+        db1.update("RewardsA", cv, "name = ? AND description = ?", new String[] {orgName, orgDesc});
     }
 
 
@@ -274,10 +291,9 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get reward id from description and reward
     public int getRewardId(String name, String desc, int value, int uid) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor id =  db1.query("Rewards", new String[]{"_id"}, "name = ? AND description = ? AND value = ? AND uid = ?",
+        Cursor id =  db1.query("RewardsA", new String[]{"_id"}, "name = ? AND description = ? AND value = ? AND uid = ?",
                 new String[] {name, desc, String.valueOf(value), String.valueOf(uid)}, null, null, null);
-        if (id != null) {
-            id.moveToFirst();
+        if (id != null && id.moveToFirst()) {
             return id.getInt(0);
         } else {
             return -999;
@@ -287,25 +303,23 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // get reward name from rid
     public String getRewardName(int rid) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor name =  db1.query("Rewards", new String[]{"name"}, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
-        if (name != null) {
-            name.moveToFirst();
+        Cursor name =  db1.query("RewardsA", new String[]{"name"}, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
+        if (name != null && name.moveToFirst()) {
             return name.getString(0);
         } else {
             return "";
         }
     }
 
-
     // get reward obj from rid
     public Cursor getRewardFromId(int rid) {
         SQLiteDatabase db1 = getWritableDatabase();
-        return db1.query("Rewards", null, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
+        return db1.query("RewardsA", null, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
     }
 
 
     // ------------------ TRANSACTIONS ------------------
-    // check if check-in id is valid (id exists in Events table)
+    // check if check-in id is valid (id exists in current Events table)
     public boolean checkValidEvent(int checkInId) {
         SQLiteDatabase db1 = getWritableDatabase();
         Cursor eids = db1.query("Events", new String[]{"_id"}, null, null, null, null, null);
