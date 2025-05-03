@@ -23,85 +23,36 @@ import java.util.Random;
 
 public class changeVendorPasswordFragment extends Fragment {
 
-    private EditText et_email, et_pwd, et_equal, et_verifyCode;
+    private EditText et_pwd, et_equal;
     private ImageView iv_eye2, iv_eye3;
-    private Button btn_sendCode, btn_changePassword;
+    private Button btn_confirm;
     private Mysqliteopenhelper mysqliteopenhelper;
     private int Visiable1 = 0, Visiable2 = 0;
-    private String sentCode = "nocode";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_change_vendor_password, container, false);
 
-        et_email = view.findViewById(R.id.et_changepwd_email);
         et_pwd = view.findViewById(R.id.et_change_password);
         et_equal = view.findViewById(R.id.et_equal_password);
-        et_verifyCode = view.findViewById(R.id.et_verify_code);
         iv_eye2 = view.findViewById(R.id.iv_eye2);
         iv_eye3 = view.findViewById(R.id.iv_eye3);
-        btn_sendCode = view.findViewById(R.id.btn_sendCode);
-        btn_changePassword = view.findViewById(R.id.btn_confirm);
+        btn_confirm = view.findViewById(R.id.btn_confirm);
 
         mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
 
-        btn_sendCode.setOnClickListener(v -> sendEmailCode());
-        btn_changePassword.setOnClickListener(this::change_password);
-
+        btn_confirm.setOnClickListener(v -> showConfirmDialog());
         iv_eye2.setOnClickListener(this::Isvisiable2);
         iv_eye3.setOnClickListener(this::Isvisiable3);
 
         return view;
     }
 
-    private void sendEmailCode() {
-        String email = et_email.getText().toString().trim();
-        if (!isHKUEmail(email)) {
-            Toast.makeText(requireContext(), "Must use HKU email", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        sentCode = generateCode();
-
-        new Thread(() -> {
-            try {
-                EmailSender.sendEmail(email, "Your Verification Code", "Your code is: " + sentCode);
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Code sent!", Toast.LENGTH_SHORT).show());
-            } catch (Exception e) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Failed to send email", Toast.LENGTH_SHORT).show());
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    private String generateCode() {
-        Random rand = new Random();
-        int code = 100000 + rand.nextInt(900000); // 6-digit code
-        return String.valueOf(code);
-    }
-
-    private boolean verifyCode() {
-        String inputCode = et_verifyCode.getText().toString().trim();
-        return inputCode.equals(sentCode);
-    }
-
-    public void change_password(View view) {
-        String name = et_email.getText().toString();
+    //----------------------------------change_password----------------------------------
+    private void showConfirmDialog() {
         String pwd = et_pwd.getText().toString();
         String equal = et_equal.getText().toString();
-
-        if (!verifyCode()) {
-            Toast.makeText(requireContext(), "Email Code incorrect", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!isHKUEmail(name)) {
-            Toast.makeText(requireContext(), "Email must be your school email", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         if (!isPasswordValid(pwd)) {
             return;
@@ -112,9 +63,24 @@ public class changeVendorPasswordFragment extends Fragment {
             return;
         }
 
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Confirm Change")
+                .setMessage("Are you sure you want to change your password?")
+                .setPositiveButton("Yes", (dialog, which) -> change_password())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+    public void change_password() {
+        String pwd = et_pwd.getText().toString();
+        String equal = et_equal.getText().toString();
+
+        //------------------------------------SQL---------------------------------------
+        //-----------------------------Update Password here---------------------------------------
+
         // TODO: update password in database
         Toast.makeText(requireContext(), "Password changed successfully!", Toast.LENGTH_SHORT).show();
     }
+
 
     private boolean isHKUEmail(String email) {
         return email.endsWith("@connect.hku.hk") || email.endsWith("@hku.hk");
