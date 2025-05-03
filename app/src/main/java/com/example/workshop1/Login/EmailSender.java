@@ -32,7 +32,7 @@ public class EmailSender {
 
         Message msg = new MimeMessage(session);
 //        msg.setFrom(new InternetAddress(fromEmail));
-        msg.setFrom(new InternetAddress(fromEmail, "HKU Support", "UTF-8"));
+        msg.setFrom(new InternetAddress(fromEmail, "HKU TokenFlow", "UTF-8"));
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
         msg.setSubject(subject);
         msg.setText(body);
