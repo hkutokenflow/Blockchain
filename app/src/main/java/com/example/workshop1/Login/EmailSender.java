@@ -1,5 +1,6 @@
 package com.example.workshop1.Login;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
@@ -13,7 +14,7 @@ import javax.mail.internet.MimeMessage;
 
 public class EmailSender {
 
-    public static void sendEmail(String toEmail, String subject, String body) throws MessagingException {
+    public static void sendEmail(String toEmail, String subject, String body) throws MessagingException, UnsupportedEncodingException {
         final String fromEmail = "2426922959@qq.com";
         final String password = "zveubypxknomeaeb";
 
@@ -30,7 +31,8 @@ public class EmailSender {
         });
 
         Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(fromEmail));
+//        msg.setFrom(new InternetAddress(fromEmail));
+        msg.setFrom(new InternetAddress(fromEmail, "HKU Support", "UTF-8"));
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
         msg.setSubject(subject);
         msg.setText(body);

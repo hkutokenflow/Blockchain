@@ -13,6 +13,7 @@ import com.example.workshop1.Login.LoginActivity;
 import com.example.workshop1.R;
 import com.example.workshop1.Vendor.VendorHome.VendorHomeFragment;
 import com.example.workshop1.Vendor.Voucher.EditVouchersFragment;
+import com.example.workshop1.Vendor.changePassword.changeVendorPasswordFragment;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -60,7 +61,12 @@ public class VendorActivity extends AppCompatActivity {
             } else if (id == R.id.nav_edit_vouchers) {
                 selectedFragment = new EditVouchersFragment();
                 toolbar.setTitle("Edit Vouchers");
-            } else if(id == R.id.nav_logout){
+            }
+            else if(id == R.id.nav_changepwd){
+                selectedFragment = new changeVendorPasswordFragment();
+                toolbar.setTitle("Change Passwords");
+            }
+            else if(id == R.id.nav_logout){
                 // log out
                 Intent intent = new Intent(VendorActivity.this, LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);  // 清空返回栈，防止按返回键回到vendor页面
