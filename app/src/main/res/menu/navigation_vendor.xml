@@ -11,7 +11,7 @@
     <item
         android:id="@+id/nav_changepwd"
         android:title="Change Your Password"
-        android:icon="@drawable/event"/>
+        android:icon="@drawable/lock"/>
 
     <item
         android:id="@+id/nav_logout"

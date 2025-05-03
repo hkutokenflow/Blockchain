@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Vendor Menu"
+        android:text="HKU TokenFlow"
         android:textColor="#FFFFFF"
         android:textSize="22sp" />
 </LinearLayout>

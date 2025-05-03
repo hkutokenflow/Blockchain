@@ -16,7 +16,7 @@
         android:gravity="center"
         android:paddingTop="40dp"
         android:scaleType="fitXY"
-        android:text="Blockchain System"
+        android:text="HKU TokenFlow"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold" />
@@ -43,11 +43,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:textSize="25sp"
             android:layout_marginBottom="30dp"
-            android:text="REGISTER"
+            android:gravity="center"
+            android:text="Register"
             android:textColor="@color/black"
-            android:gravity="center"/>
+            android:textSize="25sp" />
 
         <EditText
             android:id="@+id/et_register_name"

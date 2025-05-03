@@ -99,42 +99,42 @@ public class RegisterActivity extends AppCompatActivity {
         String pwd = et_pwd.getText().toString();
         String equal = et_equal.getText().toString();
 
-        //查看验证码是否正确
-        if(!verifyCode()){
-            Toast.makeText(this, "Email Code incorrect", Toast.LENGTH_SHORT).show();
+        // 检查邮箱格式是否为学校邮箱
+        if (!isHKUEmail(name)) {
+            Toast.makeText(this, "Email must be your HKU email", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 检查邮箱格式是否为学校邮箱
-        if (!isHKUEmail(name)) {
-            Toast.makeText(this, "Email must be your school email", Toast.LENGTH_SHORT).show();
+        //查看验证码是否正确
+        if(!verifyCode()){
+            Toast.makeText(this, "Email code incorrect", Toast.LENGTH_SHORT).show();
             return;
         }
 
         // 先检查密码格式是否合规
         if (!isPasswordValid(pwd)) {
-            Toast.makeText(this, "Password invalid!", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "Password invalid!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!pwd.equals(equal)) {
-            Toast.makeText(this, "Two time passwords are different", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!cb_accept.isChecked()) {
-            Toast.makeText(this, "Please agree to the APP Privacy Policy！", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please agree to the HKU Privacy Policy", Toast.LENGTH_SHORT).show();
             return;
         }
 
         User user = new User(name, pwd, "", "student");
         long res = mysqliteopenhelper.addUser(user);
         if (res != -1) {
-            Toast.makeText(this, "Register Successfully!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Register Failed!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show();
         }
     }
 

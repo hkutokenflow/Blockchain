@@ -11,12 +11,12 @@
     <TextView
         android:id="@+id/tv_help"
         android:layout_width="match_parent"
-        android:layout_height="93dp"
+        android:layout_height="97dp"
         android:background="@color/colorPrimary"
         android:gravity="center"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
-        android:text="Blockchain System"
+        android:paddingTop="40dp"
+        android:scaleType="fitXY"
+        android:text="HKU TokenFlow"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold" />

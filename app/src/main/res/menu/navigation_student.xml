@@ -20,8 +20,8 @@
 
     <item
         android:id="@+id/nav_hkuTokenflow"
-        android:title="HKU TokenFlow"
-        android:icon="@drawable/vendor" />
+        android:title="About HKU TokenFlow"
+        android:icon="@drawable/token" />
 
 
     <item
