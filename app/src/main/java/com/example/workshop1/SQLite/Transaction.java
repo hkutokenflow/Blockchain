@@ -5,14 +5,17 @@ public class Transaction {
     public int source;
     public int destination;
     public int amount;
-    public int eid;
+    public int erid;
+    public String ttype;
 
-    public Transaction(String dt,int s, int d, int a, int e) {
+
+    public Transaction(String dt,int s, int d, int a, int er, String t) {
         this.datetime = dt;
         this.source = s;
         this.destination = d;
         this.amount = a;
-        this.eid = e;
+        this.erid = er;
+        this.ttype = t;
     }
 
     public String getDatetime() {
@@ -47,9 +50,15 @@ public class Transaction {
         this.amount = n;
     }
 
-    public int getEid() {
-        return eid;
+    public int getErid() {
+        return erid;
     }
 
-    public void setEid(int e) { this.eid = e; }
+    public void setErid(int e) { this.erid = e; }
+
+    public String getTtype() {
+        return ttype;
+    }
+
+    public void setTtype(String e) { this.ttype = e; }
 }

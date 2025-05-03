@@ -74,7 +74,7 @@ public class EventCheckinFragment extends Fragment {
                 } else {
                     // check if check-in is repeated
                     int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
-                    Toast.makeText(getActivity(), "UID: " + uid + " - Logged in as: " + thisUser.getUsername(), Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(getActivity(), "UID: " + uid + " - Logged in as: " + thisUser.getUsername(), Toast.LENGTH_SHORT).show();
                     int checkInIdNum = Integer.parseInt(checkInId);
                     if (!mysqliteopenhelper.checkRepeatedCheckIn(checkInIdNum, uid)) {
                         Toast.makeText(getContext(), "Check-in unsuccessful\nAlready checked in to this event", Toast.LENGTH_LONG).show();
@@ -89,7 +89,7 @@ public class EventCheckinFragment extends Fragment {
                         // get event reward
                         int reward = mysqliteopenhelper.getEventReward(checkInIdNum);
 
-                        Transaction trans = new Transaction(formattedDateTime, 1, uid, reward, checkInIdNum);
+                        Transaction trans = new Transaction(formattedDateTime, 1, uid, reward, checkInIdNum, "e");
                         mysqliteopenhelper.addTransaction(trans);
 
                         Toast.makeText(getContext(), "Check-in Successful!\nEvent ID: " + checkInId, Toast.LENGTH_LONG).show();

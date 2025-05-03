@@ -1,5 +1,6 @@
 package com.example.workshop1.Admin.RecentTransaction;
 
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
+import com.example.workshop1.Student.StudentHome.StudentHomeFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,7 @@ public class RecentTransactionsFragment extends Fragment {
 
     private TableLayout transactionsTable;
     private EditText searchEditText;
+    private Mysqliteopenhelper mysqliteopenhelper;
 
     private List<Transaction> allTransactions = new ArrayList<>();
 
@@ -30,10 +34,26 @@ public class RecentTransactionsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_recent_transactions, container, false);
 
+        mysqliteopenhelper = new Mysqliteopenhelper(getContext());
+
+        // transaction table
         transactionsTable = root.findViewById(R.id.recent_transactions_table);
         searchEditText = root.findViewById(R.id.transaction_search);
 
-        setupDummyData(); // 你也可以从数据库中读取
+        Cursor cursor = mysqliteopenhelper.getAllTrans();
+        if (cursor.getCount() != 0) {
+            while (cursor.moveToNext()) {
+                String datetime = cursor.getString(1);
+                int src = cursor.getInt(2);
+                String srcType = mysqliteopenhelper.getUserType(src);
+                int dest = cursor.getInt(3);
+                String destType = mysqliteopenhelper.getUserType(dest);
+                int amt = cursor.getInt(4);
+                allTransactions.add(new Transaction(datetime, String.valueOf(src)+srcType, String.valueOf(dest)+destType, String.valueOf(amt)));
+            }
+        }
+
+        // setupDummyData(); // 你也可以从数据库中读取
         displayTransactions(allTransactions);
 
         // 搜索功能

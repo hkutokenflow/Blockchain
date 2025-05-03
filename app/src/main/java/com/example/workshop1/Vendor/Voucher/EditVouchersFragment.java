@@ -52,7 +52,7 @@ public class EditVouchersFragment extends Fragment {
 
         //-------------------------ADD----------------------------------
         Cursor cursor = mysqliteopenhelper.getRewardsVendor(vendorId);
-        if (cursor != null) {
+        if (cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
                 String name = cursor.getString(1);
                 String description = cursor.getString(2);

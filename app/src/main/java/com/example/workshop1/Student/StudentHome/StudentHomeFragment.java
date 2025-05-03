@@ -68,7 +68,7 @@ public class StudentHomeFragment extends Fragment {
 
         int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
         Cursor cursor = mysqliteopenhelper.getUserTrans(uid);
-        if (cursor != null) {
+        if (cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
                 String datetime = cursor.getString(1);
                 Log.d("StudentHome", "datetime: " + datetime);
@@ -78,14 +78,15 @@ public class StudentHomeFragment extends Fragment {
                 // determine +ve or -ve amt (-ve if source is student, ie student pay)
                 if (src == uid) { amt = -amt; }
 
-                // get event name / redeem voucher
+                // get event / reward name
                 String event;
-                if (cursor.getInt(5) != -999) {
+                if (cursor.getString(6).equals("e")) {
                     int eid = cursor.getInt(5);
                     event = mysqliteopenhelper.getEventName(eid);
-                } else {
-                    event = "Redeemed voucher";
-                }
+                } else if (cursor.getString(6).equals("r")) {
+                    int rid = cursor.getInt(5);
+                    event = mysqliteopenhelper.getRewardName(rid);
+                } else { event = "Invalid"; }
 
                 allTransactions.add(new Transaction(datetime, event, String.valueOf(amt)));
             }

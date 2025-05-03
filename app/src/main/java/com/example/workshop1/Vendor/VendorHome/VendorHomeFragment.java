@@ -1,5 +1,6 @@
 package com.example.workshop1.Vendor.VendorHome;
 
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
@@ -19,6 +20,9 @@ import androidx.fragment.app.Fragment;
 
 import com.example.workshop1.Admin.RecentTransaction.RecentTransactionsFragment;
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
+import com.example.workshop1.SQLite.User;
+import com.example.workshop1.Student.StudentHome.StudentHomeFragment;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -40,12 +44,16 @@ public class VendorHomeFragment extends Fragment {
     private TableLayout transactionsTable;
     private EditText searchEditText;
     private List<Transaction> allTransactions = new ArrayList<>();
+    private Mysqliteopenhelper mysqliteopenhelper;
 
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_vendor_home, container, false);
+
+        mysqliteopenhelper = new Mysqliteopenhelper(getContext());
+        User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
 
         // wallet balance
         vendorWalletText = root.findViewById(R.id.vendor_wallet_balance);
@@ -72,7 +80,23 @@ public class VendorHomeFragment extends Fragment {
         transactionsTable = root.findViewById(R.id.recent_transactions_table);
         searchEditText = root.findViewById(R.id.transaction_search);
 
-        setupDummyData(); // SQLite
+        // setupDummyData(); // SQLite
+        int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+        Cursor cursor = mysqliteopenhelper.getUserTrans(uid);
+        if (cursor.getCount() != 0) {
+            while (cursor.moveToNext()) {
+                String datetime = cursor.getString(1);
+                int src = cursor.getInt(2);
+                // int dest = cursor.getInt(3);  // vendor must be dest
+                int amt = cursor.getInt(4);  // amt must be +ve (receive tokens)
+                int rid = cursor.getInt(5);
+                String reward = mysqliteopenhelper.getRewardName(rid);
+
+                allTransactions.add(new Transaction(datetime, reward, String.valueOf(src), String.valueOf(amt)));
+            }
+        }
+
+
         displayTransactions(allTransactions);
 
         // 搜索功能

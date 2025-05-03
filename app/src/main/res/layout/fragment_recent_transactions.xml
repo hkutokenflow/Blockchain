@@ -23,8 +23,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18dp"
-                android:text="Recent_transactions"/>
+                android:text="a: admin\nv: vendor\ns: student"
+                android:textSize="11dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="1dp"
+                android:paddingLeft="80dp"/>
 
             <EditText
                 android:id="@+id/transaction_search"
@@ -69,33 +76,33 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Voucher"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:padding="12dp" />
+                    android:padding="12dp"
+                    android:text="Src"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="User"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:padding="12dp" />
+                    android:padding="12dp"
+                    android:text="Dest"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Balance"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:padding="12dp" />
+                    android:padding="12dp"
+                    android:text="Amount"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </TableRow>
 
             <!-- 后续数据行由 Java 添加，这里不用再写静态的了 -->

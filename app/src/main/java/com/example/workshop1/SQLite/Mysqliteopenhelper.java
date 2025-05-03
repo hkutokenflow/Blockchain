@@ -14,7 +14,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     private static final String DBNAME="Mydb";
 
     public Mysqliteopenhelper(@Nullable Context context) {
-        super(context, DBNAME, null, 6);
+        super(context, DBNAME, null, 7);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
 
         String createTransactions = "CREATE TABLE Transactions (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "datetime TEXT, source INTEGER, destination INTEGER, amount INTEGER, " +
-                "eid INTEGER REFERENCES Events(_id))";
+                "erid INTEGER, ttype varchar(2))";
         db.execSQL(createTransactions);
 
         String createRewards = "CREATE TABLE Rewards (_id INTEGER PRIMARY KEY, " +
@@ -99,18 +99,35 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     public int getUserId(String username, String pwd) {
         SQLiteDatabase db1 = getWritableDatabase();
         Cursor id =  db1.query("Users", new String[]{"_id"}, "username = ? AND password = ?", new String[] {username, pwd}, null, null, null);
-        if (id != null) {
-            id.moveToFirst();
+        if (id != null && id.moveToFirst()) {
             return id.getInt(0);
         } else {
             return -999;
         }
     }
 
-    // get all user transactions
+    // get all transactions of a user
     public Cursor getUserTrans(int uid) {
         SQLiteDatabase db1 = getWritableDatabase();
         return db1.query("Transactions", null, "source = ? OR destination = ?", new String[] {String.valueOf(uid), String.valueOf(uid)}, null, null, "datetime DESC");
+    }
+
+    // get type of user given id
+    public String getUserType(int uid) {
+        SQLiteDatabase db1 = getWritableDatabase();
+        Cursor cur = db1.query("Users", new String[]{"type"}, "_id = ?", new String[] {String.valueOf(uid)}, null, null, null);
+        if (cur.getCount() != 0) {
+            cur.moveToNext();
+            String type =  cur.getString(0);
+            if (type.equals("admin")) {
+                return "(a)";
+            } else if (type.equals("student")) {
+                return "(s)";
+            } else {
+                return "(v)";
+            }
+        }
+        return "(?)";
     }
 
 
@@ -267,12 +284,24 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         }
     }
 
+    // get reward name from rid
+    public String getRewardName(int rid) {
+        SQLiteDatabase db1 = getWritableDatabase();
+        Cursor name =  db1.query("Rewards", new String[]{"name"}, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
+        if (name != null) {
+            name.moveToFirst();
+            return name.getString(0);
+        } else {
+            return "";
+        }
+    }
+
+
     // get reward obj from rid
     public Cursor getRewardFromId(int rid) {
         SQLiteDatabase db1 = getWritableDatabase();
         return db1.query("Rewards", null, "_id = ?", new String[] {String.valueOf(rid)}, null, null, null);
     }
-
 
 
     // ------------------ TRANSACTIONS ------------------
@@ -294,7 +323,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // check if check-in is repeated (if source,dest already exists in Transactions)
     public boolean checkRepeatedCheckIn(int checkInId, int srcId) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor res = db1.query("Transactions", null, "eid = ? AND destination = ?", new String[] {String.valueOf(checkInId), String.valueOf(srcId)}, null, null, null);
+        Cursor res = db1.query("Transactions", null, "erid = ? AND destination = ? AND ttype = ?", new String[] {String.valueOf(checkInId), String.valueOf(srcId), "e"}, null, null, null);
         Log.d("SQL",  "result length: " + res.getCount());
         return res.getCount() == 0;
     }
@@ -310,8 +339,9 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         cursor.moveToFirst();
         int sourceBalance = cursor.getInt(0);
         int newSourceBalance = sourceBalance - trans.getAmount();
-        String updateSource = "UPDATE Users SET balance = " + newSourceBalance + " WHERE _id = " + sourceUid;
-        db.execSQL(updateSource);
+        ContentValues cvSrc = new ContentValues();
+        cvSrc.put("balance", newSourceBalance);
+        db.update("Users", cvSrc, "_id = ?", new String[] {sourceUid});
         Log.d("SQL", "source balance updated");
 
         String destUid = String.valueOf(trans.getDestination());
@@ -319,8 +349,9 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         cursor1.moveToFirst();
         int destBalance = cursor1.getInt(0);
         int newDestBalance = destBalance + trans.getAmount();
-        String updateDest = "UPDATE Users SET balance = " + newDestBalance + " WHERE _id = " + destUid;
-        db.execSQL(updateDest);
+        ContentValues cvDest = new ContentValues();
+        cvDest.put("balance", newDestBalance);
+        db.update("Users", cvDest, "_id = ?", new String[] {destUid});
         Log.d("SQL", "dest balance updated");
 
         // Add row to Transactions
@@ -329,9 +360,17 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         contentValues.put("source", trans.getSource());
         contentValues.put("destination", trans.getDestination());
         contentValues.put("amount", trans.getAmount());
-        contentValues.put("eid", trans.getEid());
+        contentValues.put("erid", trans.getErid());
+        contentValues.put("ttype", trans.getTtype());
         return db.insert("Transactions",null, contentValues);
     }
+
+    // Get all transactions
+    public Cursor getAllTrans() {
+        SQLiteDatabase db1 = getWritableDatabase();
+        return db1.query("Transactions", null, null, null, null, null, "datetime DESC");
+    }
+
 
 
     // ------------------ STUDENTREWARDS ------------------

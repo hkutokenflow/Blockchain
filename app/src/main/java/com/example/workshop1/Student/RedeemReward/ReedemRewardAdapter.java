@@ -99,7 +99,7 @@ public class ReedemRewardAdapter extends RecyclerView.Adapter<ReedemRewardAdapte
                 calendar.setTimeZone(hktTimeZone);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
                 String formattedDateTime = sdf.format(calendar.getTime());
-                Transaction trans = new Transaction(formattedDateTime, sid,  reward.uid, reward.tokens, -999);
+                Transaction trans = new Transaction(formattedDateTime, sid,  reward.uid, reward.tokens, rewardId, "r");
                 mysqliteopenhelper.addTransaction(trans);
 
                 Toast.makeText(context, "Reward Redeemed!", Toast.LENGTH_SHORT).show();
