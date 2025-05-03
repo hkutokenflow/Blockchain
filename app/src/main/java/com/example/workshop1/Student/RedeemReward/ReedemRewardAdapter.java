@@ -3,6 +3,7 @@ package com.example.workshop1.Student.RedeemReward;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,20 +15,30 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.workshop1.R;
+import com.example.workshop1.SQLite.Mysqliteopenhelper;
+import com.example.workshop1.SQLite.StudentReward;
+import com.example.workshop1.SQLite.Transaction;
+import com.example.workshop1.SQLite.User;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 // RewardAdapter.java
 public class ReedemRewardAdapter extends RecyclerView.Adapter<ReedemRewardAdapter.ViewHolder> {
 
     private List<RewardItem> rewardList;
     private Context context;
+    private User thisUser;
+    private Mysqliteopenhelper mysqliteopenhelper;
 
-    public ReedemRewardAdapter(Context context, List<RewardItem> rewards) {
+    public ReedemRewardAdapter(Context context, List<RewardItem> rewards, User user) {
         this.context = context;
         this.rewardList = rewards;
+        this.thisUser = user;
     }
-
 
     @NonNull
     @Override
@@ -69,8 +80,34 @@ public class ReedemRewardAdapter extends RecyclerView.Adapter<ReedemRewardAdapte
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnConfirm.setOnClickListener(v -> {
-            Toast.makeText(context, "Reward Redeemed!", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
+            // Check if balance is enough
+            Log.d("RedeemRewards", "User balance" + thisUser.getBalance());
+            Log.d("RedeemRewards", "Reward cost" + reward.tokens);
+            if (thisUser.getBalance() >= reward.tokens) {
+
+                mysqliteopenhelper = new Mysqliteopenhelper(context);
+
+                // Add record into StudentRewards
+                int rewardId = mysqliteopenhelper.getRewardId(reward.title, reward.description, reward.tokens, reward.uid);
+                int sid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
+                StudentReward sr = new StudentReward(sid, rewardId);
+                mysqliteopenhelper.addStudentReward(sr);
+
+                // Add transaction + update user balances
+                Calendar calendar = Calendar.getInstance();  // Create a Calendar instance
+                TimeZone hktTimeZone = TimeZone.getTimeZone("Asia/Hong_Kong");  // Set the timezone to HKT
+                calendar.setTimeZone(hktTimeZone);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+                String formattedDateTime = sdf.format(calendar.getTime());
+                Transaction trans = new Transaction(formattedDateTime, sid,  reward.uid, reward.tokens, -999);
+                mysqliteopenhelper.addTransaction(trans);
+
+                Toast.makeText(context, "Reward Redeemed!", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            } else {
+                Toast.makeText(context, "Insufficient balance", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
         });
 
         dialog.show();

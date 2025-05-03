@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -242,7 +243,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put("name", newName);
         cv.put("description", newDesc);
-        cv.put("reward", newToken);
+        cv.put("value", newToken);
         db1.update("Rewards", cv, "name = ? AND description = ?", new String[] {orgName, orgDesc});
     }
 
@@ -251,6 +252,20 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     public void deleteReward(String orgName, String orgDesc) {
         SQLiteDatabase db1 = getWritableDatabase();
         db1.delete("Rewards", "name = ? AND description = ?", new String[] {orgName, orgDesc});
+    }
+
+
+    // get reward id from description and reward
+    public int getRewardId(String name, String desc, int value, int uid) {
+        SQLiteDatabase db1 = getWritableDatabase();
+        Cursor id =  db1.query("Rewards", new String[]{"_id"}, "name = ? AND description = ? AND value = ? AND uid = ?",
+                new String[] {name, desc, String.valueOf(value), String.valueOf(uid)}, null, null, null);
+        if (id != null) {
+            id.moveToFirst();
+            return id.getInt(0);
+        } else {
+            return -999;
+        }
     }
 
 
@@ -274,8 +289,9 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     // check if check-in is repeated (if source,dest already exists in Transactions)
     public boolean checkRepeatedCheckIn(int checkInId, int srcId) {
         SQLiteDatabase db1 = getWritableDatabase();
-        Cursor res = db1.query("Transactions", null, "eid = ? AND source = ?", new String[] {String.valueOf(checkInId), String.valueOf(srcId)}, null, null, null);
-        return !res.moveToNext();  // moveToNext() returns false if result is empty -> empty = valid
+        Cursor res = db1.query("Transactions", null, "eid = ? AND destination = ?", new String[] {String.valueOf(checkInId), String.valueOf(srcId)}, null, null, null);
+        Log.d("SQL",  "result length: " + res.getCount());
+        return res.getCount() == 0;
     }
 
     // Add transaction
@@ -291,6 +307,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         int newSourceBalance = sourceBalance - trans.getAmount();
         String updateSource = "UPDATE Users SET balance = " + newSourceBalance + " WHERE _id = " + sourceUid;
         db.execSQL(updateSource);
+        Log.d("SQL", "source balance updated");
 
         String destUid = String.valueOf(trans.getDestination());
         Cursor cursor1 = db1.rawQuery("SELECT balance FROM Users WHERE _id = ?", new String[]{destUid});
@@ -299,6 +316,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         int newDestBalance = destBalance + trans.getAmount();
         String updateDest = "UPDATE Users SET balance = " + newDestBalance + " WHERE _id = " + destUid;
         db.execSQL(updateDest);
+        Log.d("SQL", "dest balance updated");
 
         // Add row to Transactions
         ContentValues contentValues = new ContentValues();
@@ -311,9 +329,20 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     }
 
 
+    // ------------------ STUDENTREWARDS ------------------
+    // Add student-reward record (redeem reward)
+    public void addStudentReward(StudentReward sr){
+        SQLiteDatabase db=getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put("uid", sr.getUid());
+        contentValues.put("rid", sr.getRid());
+
+        db.insert("StudentRewards",null, contentValues);
+    }
 
 
-    // Delete all transactions + reset balance for testing
+    // ------------------ Delete all transactions + reset balance for testing ----------------
     public void reset() {
         SQLiteDatabase db = this.getWritableDatabase();
         String deleteAllTransactions = "DELETE FROM Transactions";

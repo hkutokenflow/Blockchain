@@ -80,7 +80,7 @@ public class StudentHomeFragment extends Fragment {
 
                 // get event name / redeem voucher
                 String event;
-                if (!cursor.isNull(5)) {
+                if (cursor.getInt(5) != -999) {
                     int eid = cursor.getInt(5);
                     event = mysqliteopenhelper.getEventName(eid);
                 } else {

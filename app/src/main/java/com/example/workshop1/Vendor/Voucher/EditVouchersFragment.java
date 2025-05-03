@@ -40,6 +40,7 @@ public class EditVouchersFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_edit_vouchers, container, false);
         User thisUser = (User) requireActivity().getIntent().getSerializableExtra("userObj");
+
         mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
 
         int vendorId = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
@@ -49,9 +50,8 @@ public class EditVouchersFragment extends Fragment {
         addButton = view.findViewById(R.id.btn_add);
         voucherList = new ArrayList<>();
 
-        Cursor cursor = mysqliteopenhelper.getRewardsVendor(vendorId);
-
         //-------------------------ADD----------------------------------
+        Cursor cursor = mysqliteopenhelper.getRewardsVendor(vendorId);
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 String name = cursor.getString(1);

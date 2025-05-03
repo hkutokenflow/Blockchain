@@ -69,17 +69,14 @@ public class EventCheckinFragment extends Fragment {
                 checkInId = result.getContents();  // 将二维码的内容存储在eventId变量中
 
                 // check if check-in id is valid (exists in Events)
-                boolean valid = mysqliteopenhelper.checkValidEvent(Integer.parseInt(checkInId));
-                if (!valid) {
+                if (!mysqliteopenhelper.checkValidEvent(Integer.parseInt(checkInId))) {
                     Toast.makeText(getContext(), "Check-in unsuccessful\nInvalid event ID", Toast.LENGTH_LONG).show();
                 } else {
                     // check if check-in is repeated
                     int uid = mysqliteopenhelper.getUserId(thisUser.getUsername(), thisUser.getPassword());
                     Toast.makeText(getActivity(), "UID: " + uid + " - Logged in as: " + thisUser.getUsername(), Toast.LENGTH_SHORT).show();
-
                     int checkInIdNum = Integer.parseInt(checkInId);
-                    valid = mysqliteopenhelper.checkRepeatedCheckIn(checkInIdNum, uid);
-                    if (!valid) {
+                    if (!mysqliteopenhelper.checkRepeatedCheckIn(checkInIdNum, uid)) {
                         Toast.makeText(getContext(), "Check-in unsuccessful\nAlready checked in to this event", Toast.LENGTH_LONG).show();
                     } else {
                         // get current datetime
