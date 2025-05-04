@@ -34,6 +34,23 @@
 <!--            android:textColor="#FFFFFF" />-->
 
         <Button
+            android:id="@+id/btn_gen_qr"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:drawableLeft="@drawable/baseline_qr_code_2_24"
+            android:drawablePadding="0dp"
+            android:backgroundTint="#2196F3"
+            android:text="Create"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center"/>
+
+        <Button
             android:id="@+id/btn_add"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
@@ -41,7 +58,7 @@
             android:minHeight="0dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:text="+ Add new"
             android:backgroundTint="#2196F3"
             android:textColor="#FFFFFF"

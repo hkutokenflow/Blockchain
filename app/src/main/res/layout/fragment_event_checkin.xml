@@ -11,5 +11,6 @@
         android:layout_height="wrap_content"
         android:padding="20dp"
         android:textSize="20dp"
-        android:text="Scan QR to Check-in" />
+        android:drawableLeft="@drawable/baseline_qr_code_2_24"
+        android:text="Check-in" />
 </LinearLayout>

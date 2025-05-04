@@ -1,7 +1,9 @@
 package com.example.workshop1.Admin.Event;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -28,6 +30,7 @@ public class EditEventsFragment extends Fragment {
 
     private ListView eventListView;
     private Button addButton;
+    private Button genQrButton;
     private List<EventItem> eventList;
     private EventListAdapter adapter;
     private Mysqliteopenhelper mysqliteopenhelper;
@@ -39,6 +42,7 @@ public class EditEventsFragment extends Fragment {
 
         eventListView = view.findViewById(R.id.event_list_view);
         addButton = view.findViewById(R.id.btn_add);
+        genQrButton = view.findViewById(R.id.btn_gen_qr);
         eventList = new ArrayList<>();
 
         //-------------------------ADD----------------------------------
@@ -64,6 +68,12 @@ public class EditEventsFragment extends Fragment {
         eventListView.setAdapter(adapter);
 
         addButton.setOnClickListener(v -> showAddEventDialog());
+
+        genQrButton.setOnClickListener(v -> {
+            // Create an Intent to open a web browser
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.qr-code-generator.com/"));
+            startActivity(browserIntent);
+        });
 
         return view;
 
@@ -117,9 +127,10 @@ public class EditEventsFragment extends Fragment {
         });
 
         cancelButton.setOnClickListener(v -> dialog.dismiss());
-
         dialog.show();
     }
+
+
 
 }
 

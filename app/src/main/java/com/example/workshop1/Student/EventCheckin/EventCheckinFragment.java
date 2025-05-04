@@ -92,7 +92,9 @@ public class EventCheckinFragment extends Fragment {
                         Transaction trans = new Transaction(formattedDateTime, 1, uid, reward, checkInIdNum, "e");
                         mysqliteopenhelper.addTransaction(trans);
 
-                        Toast.makeText(getContext(), "Check-in Successful!\nEvent ID: " + checkInId, Toast.LENGTH_LONG).show();
+                        String eName = mysqliteopenhelper.getEventName(checkInIdNum);
+
+                        Toast.makeText(getContext(), "Check-in successful!\nEvent: " + eName, Toast.LENGTH_LONG).show();
                     }
                 }
 
