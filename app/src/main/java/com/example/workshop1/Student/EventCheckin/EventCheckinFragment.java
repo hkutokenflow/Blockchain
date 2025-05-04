@@ -1,6 +1,7 @@
 package com.example.workshop1.Student.EventCheckin;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.workshop1.R;
@@ -21,12 +23,17 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
 public class EventCheckinFragment extends Fragment {
 
+    private ListView eventListView;
+    private List<EventItem> eventList;
+    private StudentEventListAdapter adapter;
     private Button scanBtn;
     private String checkInId;  // 用于存储扫描到的eventid
     private Mysqliteopenhelper mysqliteopenhelper;
@@ -38,7 +45,27 @@ public class EventCheckinFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_event_checkin, container, false);
 
+        eventListView = view.findViewById(R.id.student_event_list_view);
         scanBtn = view.findViewById(R.id.btn_scan_qr);
+        eventList = new ArrayList<>();
+
+        //------------------------Event List----------------------------------
+        mysqliteopenhelper = new Mysqliteopenhelper(requireContext());
+        Cursor cursor = mysqliteopenhelper.getEvents();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(1);
+                int tokens = cursor.getInt(2);
+                eventList.add(new EventItem(name, tokens));
+            }
+        }
+
+        //-----------------------set adapter------------------
+        adapter = new StudentEventListAdapter(getContext(), eventList);
+        eventListView.setAdapter(adapter);
+
+
+        //----------------------scan QR code-----------------
         scanBtn.setOnClickListener(v -> startQRScanner());
 
         return view;
