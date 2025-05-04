@@ -54,11 +54,13 @@ public class EditVouchersFragment extends Fragment {
 
         //-------------------------ADD----------------------------------
         Cursor cursor = mysqliteopenhelper.getRewardsVendor(vendorId);
-        if (cursor != null && cursor.moveToNext()) {
-            String name = cursor.getString(1);
-            String description = cursor.getString(2);
-            int value = cursor.getInt(3);
-            voucherList.add(new VoucherItem(name, description, value));
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(1);
+                String description = cursor.getString(2);
+                int value = cursor.getInt(3);
+                voucherList.add(new VoucherItem(name, description, value));
+            }
         }
 
         //-------------------EDIT和DELETE都在这边----------------------

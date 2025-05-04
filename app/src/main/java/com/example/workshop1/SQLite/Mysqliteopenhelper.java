@@ -14,7 +14,7 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     private static final String DBNAME="Mydb";
 
     public Mysqliteopenhelper(@Nullable Context context) {
-        super(context, DBNAME, null, 8);
+        super(context, DBNAME, null, 1);
     }
 
     @Override
@@ -34,23 +34,22 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
                 "uid INTEGER REFERENCES Users(_id))";
         db.execSQL(createRewards);
 
-        String createEvents = "CREATE TABLE Events (_id INTEGER PRIMARY KEY, " +
+        String createEvents = "CREATE TABLE Events (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "description varchar(2000), reward INTEGER)";
         db.execSQL(createEvents);
 
-        String createStudentRewards = "CREATE TABLE StudentRewards (_id INTEGER PRIMARY KEY, " +
+        String createStudentRewards = "CREATE TABLE StudentRewards (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "uid INTEGER REFERENCES Users(_id)," +
                 "rid INTEGER REFERENCES Rewards(_id))";
         db.execSQL(createStudentRewards);
 
-
         // Archive tables for events and rewards
-        String createRewardsA = "CREATE TABLE RewardsA (_id INTEGER PRIMARY KEY, " +
+        String createRewardsA = "CREATE TABLE RewardsA (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "name varchar(255), description varchar(1000), value INTEGER," +
                 "uid INTEGER REFERENCES Users(_id))";
         db.execSQL(createRewardsA);
 
-        String createEventsA = "CREATE TABLE EventsA (_id INTEGER PRIMARY KEY, " +
+        String createEventsA = "CREATE TABLE EventsA (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "description varchar(2000), reward INTEGER)";
         db.execSQL(createEventsA);
 
@@ -58,11 +57,12 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         // Create admin account
         String addAdmin = "INSERT INTO Users VALUES(1, 'admin', 'admin123','HKU TokenFlow Admin', 'admin', 0)";
         db.execSQL(addAdmin);
-        /*String addVendor1 = "INSERT INTO Users VALUES(2, 'vendor1', 'vendor123','vender1 name', 'vendor', 0)";
+        // accounts for testing
+        /*String addVendor1 = "INSERT INTO Users VALUES(2, 'v1', 'password','vender1 name', 'vendor', 0)";
         db.execSQL(addVendor1);
-        String addVendor2 = "INSERT INTO Users VALUES(3, 'vendor2', 'vendor123','vender2 name', 'vendor', 0)";
+        String addVendor2 = "INSERT INTO Users VALUES(3, 'v2', 'password','vender2 name', 'vendor', 0)";
         db.execSQL(addVendor2);
-        String addStudent = "INSERT INTO Users VALUES(4, 'student', 'student123','student', 'student', 0)";
+        String addStudent = "INSERT INTO Users VALUES(4, 'student', 'password','student', 'student', 0)";
         db.execSQL(addStudent);*/
 
     }
@@ -186,8 +186,23 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("description", event.getDescription());
         contentValues.put("reward", event.getReward());
-        db.insert("EventsA",null, contentValues);
-        return db.insert("Events",null, contentValues);
+        long resA = db.insert("EventsA",null, contentValues);
+        if (resA == -1) {
+            Log.e("SQL addEvent", "Failed to insert into RewardsA");
+        } else {
+            Log.d("SQL addEvent", "Insert into EventsA sucessful");
+        }
+
+        ContentValues contentValues2 = new ContentValues();
+        contentValues2.put("description", event.getDescription());
+        contentValues2.put("reward", event.getReward());
+        long res = db.insert("Events",null, contentValues2);
+        if (res == -1) {
+            Log.e("SQL addEvent", "Failed to insert into Rewards");
+        } else {
+            Log.d("SQL addEvent", "Insert into Events sucessful");
+        }
+        return res;
     }
 
     // get current events list
@@ -203,7 +218,11 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         cv.put("description", newName);
         cv.put("reward", newToken);
         db1.update("Events", cv, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)});
-        db1.update("EventsA", cv, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)});
+
+        ContentValues cvA = new ContentValues();
+        cvA.put("description", newName);
+        cvA.put("reward", newToken);
+        db1.update("EventsA", cvA, "description = ? AND reward = ?", new String[] {orgName, String.valueOf(orgToken)});
     }
 
     // get event id from description and reward
@@ -267,8 +286,25 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         contentValues.put("description", reward.getDescription());
         contentValues.put("value", reward.getValue());
         contentValues.put("uid", reward.getUid());
-        db.insert("RewardsA",null, contentValues);
-        return db.insert("Rewards",null, contentValues);
+        long resA = db.insert("RewardsA",null, contentValues);
+        if (resA == -1) {
+            Log.e("SQL addEvent", "Failed to insert into RewardsA");
+        } else {
+            Log.d("SQL addEvent", "Insert into RewardsA sucessful");
+        }
+
+        ContentValues contentValues2 = new ContentValues();
+        contentValues2.put("name", reward.getName());
+        contentValues2.put("description", reward.getDescription());
+        contentValues2.put("value", reward.getValue());
+        contentValues2.put("uid", reward.getUid());
+        long res = db.insert("Rewards",null, contentValues2);
+        if (res == -1) {
+            Log.e("SQL addEvent", "Failed to insert into Rewards");
+        } else {
+            Log.d("SQL addEvent", "Insert into Rewards sucessful");
+        }
+        return res;
     }
 
     // edit reward name
@@ -279,7 +315,12 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
         cv.put("description", newDesc);
         cv.put("value", newToken);
         db1.update("Rewards", cv, "name = ? AND description = ?", new String[] {orgName, orgDesc});
-        db1.update("RewardsA", cv, "name = ? AND description = ?", new String[] {orgName, orgDesc});
+
+        ContentValues cv2 = new ContentValues();
+        cv2.put("name", newName);
+        cv2.put("description", newDesc);
+        cv2.put("value", newToken);
+        db1.update("RewardsA", cv2, "name = ? AND description = ?", new String[] {orgName, orgDesc});
     }
 
 
