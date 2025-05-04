@@ -45,28 +45,11 @@ public class StudentEventListAdapter extends ArrayAdapter<EventItem> {
 
         TextView nameView = convertView.findViewById(R.id.tv_event_name);
         TextView tokenView = convertView.findViewById(R.id.tv_token_count);
-        ImageButton viewButton = convertView.findViewById(R.id.btn_view);
 
         mysqliteopenhelper = new Mysqliteopenhelper(context);
 
         nameView.setText(currentEvent.name);
         tokenView.setText(currentEvent.tokens + " tokens");
-
-
-        //-------------------------------VIEW-------------------------------------
-        viewButton.setOnClickListener(v -> {
-            String description = currentEvent.getName();
-            int reward = currentEvent.getTokens();
-
-            int eventId = mysqliteopenhelper.getEventId(description, reward);
-
-            // Create and show a dialog to display the username and password
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle(description);
-            builder.setMessage("Event ID: " + eventId);
-            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-            builder.show();
-        });
 
 
         return convertView;

@@ -9,7 +9,7 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit Vendor Name"
+        android:text="Add Vendor"
         android:textSize="18sp"
         android:textStyle="bold"
         android:padding="12dp" />
@@ -18,7 +18,7 @@
         android:id="@+id/et_vendor_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Vendor Name"
+        android:hint="Vendor name"
         android:inputType="text"
         android:padding="12dp" />
 
