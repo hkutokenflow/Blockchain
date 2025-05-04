@@ -1,7 +1,7 @@
 # HKU TokenFlow  
 *An Initiative of a Token-based Ecosystem in HKU.*  
 
----
+Github Link: https://github.com/hkutokenflow/Blockchain
 
 ## Compile and Run  
 1. **Java Version Requirement**:  
@@ -15,7 +15,6 @@
    - Open Android Studio → `New` → `Project from Version Control` → `Git`.  
    - URL: `https://github.com/hkutokenflow/Blockchain.git` → `Clone` → `Run`.  
 
----
 
 ## Initial Settings  
 - **Default Admin Account**:  
@@ -25,7 +24,6 @@
   - Admins can add vendor accounts via *"Manage Vendor"*.  
   - Students can register through the app.  
 
----
 
 ## Project Aims  
 HKU TokenFlow is a blockchain-based system that:  
@@ -37,7 +35,6 @@ HKU TokenFlow is a blockchain-based system that:
   - Event tickets  
 - Enhances student engagement through tangible incentives.  
 
----
 
 ## Project Structure  
 ```plaintext
