@@ -106,9 +106,10 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
                 String username = users.getString(1);
                 String uname = users.getString(3);
                 String type = users.getString(4);
-                int balance = users.getInt(5);
+                String wallet = users.getString(5);
+                int balance = users.getInt(6);
 
-                return new User(username, dbpwd, uname, type, balance);
+                return new User(username, dbpwd, uname, type, wallet, balance);
             }
         }
         return null;  // unsuccessful login

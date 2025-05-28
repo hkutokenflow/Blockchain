@@ -1,6 +1,5 @@
 package com.example.workshop1.SQLite;
 
-
 import java.io.Serializable;
 
 public class User implements Serializable {
@@ -8,21 +7,25 @@ public class User implements Serializable {
     private String password;
     private String name;
     private String type;
+    private String walletAddress;
     private int balance;
 
-    public User(String n,String p, String name, String type){
-        this.username = n;
-        this.password = p;
+
+    public User(String username, String password, String name, String type, String walletAddress) {
+        this.username = username;
+        this.password = password;
         this.name = name;
         this.type = type;
+        this.walletAddress = walletAddress;
         this.balance = 0;
     }
 
-    public User(String n, String p, String name, String type, int balance) {
+    public User(String n, String p, String name, String type, String walletAddress, int balance) {
         this.username = n;
         this.password = p;
         this.name = name;
         this.type = type;
+        this.walletAddress = walletAddress;
         this.balance = balance;
     }
 
@@ -65,5 +68,13 @@ public class User implements Serializable {
 
     public void setBalance(int balance) {
         this.balance = balance;
+    }
+
+    public String getWalletAddress() {
+        return walletAddress;
+    }
+
+    public void setWalletAddress(String walletAddress) {
+        this.walletAddress = walletAddress;
     }
 }

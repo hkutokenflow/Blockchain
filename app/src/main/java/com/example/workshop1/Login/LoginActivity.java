@@ -23,6 +23,9 @@ import com.example.workshop1.SQLite.Mysqliteopenhelper;
 import com.example.workshop1.SQLite.User;
 import com.example.workshop1.Student.StudentActivity;
 import com.example.workshop1.Vendor.VendorActivity;
+import com.example.workshop1.Ethereum.EthereumManager;
+
+import java.math.BigInteger;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -40,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
     private CheckBox remeberPass;
     private String account,password;
 
+    private EthereumManager ethereumManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,8 @@ public class LoginActivity extends AppCompatActivity {
         pref= PreferenceManager.getDefaultSharedPreferences(this);
         remeberPass=(CheckBox)findViewById(R.id.remeber_pass);
 
+        // Initialize EthereumManager
+        ethereumManager = new EthereumManager();
     }
 
 
@@ -131,19 +137,26 @@ public class LoginActivity extends AppCompatActivity {
                 // Based on selected user type, go to the respective activity
                 switch (type) {
                     case "student":
-                        intent = new Intent(this, StudentActivity.class);  // Jump to StudentActivity
+                        intent = new Intent(this, StudentActivity.class);
+                        // Assign student role in smart contract if needed
+                        ethereumManager.assignRole(login_success.getWalletAddress(), "STUDENT");
                         break;
                     case "vendor":
-                        intent = new Intent(this, VendorActivity.class);  // Jump to VendorActivity
+                        intent = new Intent(this, VendorActivity.class);
+                        // Assign vendor role in smart contract if needed
+                        ethereumManager.assignRole(login_success.getWalletAddress(), "VENDOR");
                         break;
                     case "admin":
-                        intent = new Intent(this, AdminActivity.class);  // Jump to AdminActivity
+                        intent = new Intent(this, AdminActivity.class);
                         break;
                     default:
                         Toast.makeText(this, "user type invalid", Toast.LENGTH_SHORT).show();
                         return;
                 }
 
+                // Get user's token balance
+                BigInteger balance = ethereumManager.getBalance(login_success.getWalletAddress());
+                intent.putExtra("tokenBalance", balance.toString());
                 intent.putExtra("userObj", login_success);
                 startActivity(intent);  // 登陆成功，跳转到对应的 Activity
 

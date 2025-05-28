@@ -37,9 +37,9 @@ android {
         resources {
             excludes += "/META-INF/NOTICE.md"
             excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/DISCLAIMER"
         }
     }
-
 }
 
 dependencies {
@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.mpandroidchart)
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("org.web3j:core:4.9.8")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
