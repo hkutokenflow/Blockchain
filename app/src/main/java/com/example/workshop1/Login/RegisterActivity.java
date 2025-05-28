@@ -16,11 +16,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.workshop1.R;
 import com.example.workshop1.SQLite.Mysqliteopenhelper;
 import com.example.workshop1.SQLite.User;
+import com.example.workshop1.Ethereum.EthereumManager;
 
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
+
+import java.security.SecureRandom;
 import java.util.Random;
 
 public class RegisterActivity extends AppCompatActivity {
-
 
     private EditText et_email,et_pwd,et_equal, et_verifyCode;
     private ImageView iv_eye2,iv_eye3;
@@ -28,11 +33,16 @@ public class RegisterActivity extends AppCompatActivity {
     private Mysqliteopenhelper mysqliteopenhelper;
     private int Visiable1=0,Visiable2=0;
     private String sentCode = "nocode";
+    private EthereumManager ethereumManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        
+        // Initialize EthereumManager
+        ethereumManager = new EthereumManager();
+
         et_email=findViewById(R.id.et_register_name);
         et_pwd=findViewById(R.id.et_register_password);
         et_equal=findViewById(R.id.et_equal_password);
@@ -48,10 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
         Button btn_sendCode = findViewById(R.id.btn_sendCode);
         btn_sendCode.setOnClickListener(v -> sendEmailCode());
 
-
     }
-
-
 
     //------------------------------------sendEmailCode------------------------------
     private void sendEmailCode() {
@@ -82,7 +89,6 @@ public class RegisterActivity extends AppCompatActivity {
         return String.valueOf(code);
     }
 
-
     private boolean verifyCode() {
         String inputCode = et_verifyCode.getText().toString().trim();
         if (inputCode.equals(sentCode)) {
@@ -93,6 +99,24 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     //--------------------------------------register--------------------------------------
+    private String createWallet() {
+        try {
+            // Generate a new random private key
+            byte[] privateKeyBytes = new byte[32];
+            SecureRandom secureRandom = new SecureRandom();
+            secureRandom.nextBytes(privateKeyBytes);
+            
+            // Create credentials from the private key
+            ECKeyPair keyPair = ECKeyPair.create(privateKeyBytes);
+            Credentials credentials = Credentials.create(keyPair);
+            
+            // Return the wallet address
+            return credentials.getAddress();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public void register_newuser(View view) {
         String name = et_email.getText().toString();
@@ -127,18 +151,31 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        User user = new User(name, pwd, "", "student");
+        // Create a new wallet for the student
+        String walletAddress = createWallet();
+        if (walletAddress == null) {
+            Toast.makeText(this, "Failed to create wallet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Create user with wallet address
+        User user = new User(name, pwd, "", "student", walletAddress);
         long res = mysqliteopenhelper.addUser(user);
+        
         if (res != -1) {
-            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+            // Assign student role in smart contract
+            try {
+                ethereumManager.assignRole(walletAddress, "STUDENT");
+                Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+            } catch (Exception e) {
+                Toast.makeText(this, "Failed to assign role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
     //---------------------------------isHKUEmail---------------------------------
     private boolean isHKUEmail(String email) {
@@ -171,7 +208,6 @@ public class RegisterActivity extends AppCompatActivity {
         return true; // 全部符合要求
     }
 
-
     //监听密码是否可见
     public void Isvisiable2(View view){
         if(Visiable1==0){
@@ -199,5 +235,4 @@ public class RegisterActivity extends AppCompatActivity {
             Visiable2=0;
         }
     }
-
 }

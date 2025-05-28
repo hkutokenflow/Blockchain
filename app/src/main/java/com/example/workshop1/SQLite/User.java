@@ -11,6 +11,15 @@ public class User implements Serializable {
     private int balance;
 
 
+    public User(String username, String password, String name, String type) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.type = type;
+        this.walletAddress = null;
+        this.balance = 0;
+    }
+
     public User(String username, String password, String name, String type, String walletAddress) {
         this.username = username;
         this.password = password;

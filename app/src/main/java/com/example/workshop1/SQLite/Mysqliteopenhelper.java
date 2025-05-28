@@ -20,8 +20,9 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createUsers = "CREATE TABLE Users (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "username varchar(255), password varchar(255)," +
-                "name varchar(255), type varchar(16), balance INTEGER)";
+                "username varchar(255), password varchar(255), " +
+                "name varchar(255), type varchar(16), balance INTEGER, " +
+                "wallet_address varchar(42))";  // Ethereum addresses are 42 characters (0x + 40 hex chars)
         db.execSQL(createUsers);
 
         String createTransactions = "CREATE TABLE Transactions (_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -53,9 +54,8 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
                 "description varchar(2000), reward INTEGER)";
         db.execSQL(createEventsA);
 
-
-        // Create admin account
-        String addAdmin = "INSERT INTO Users VALUES(1, 'admin', 'admin123','HKU TokenFlow Admin', 'admin', 0)";
+        // Create admin account with null wallet address
+        String addAdmin = "INSERT INTO Users VALUES(1, 'admin', 'admin123', 'HKU TokenFlow Admin', 'admin', 0, NULL)";
         db.execSQL(addAdmin);
         // accounts for testing
         /*String addVendor1 = "INSERT INTO Users VALUES(2, 'v1', 'password','vender1 name', 'vendor', 0)";
@@ -83,17 +83,16 @@ public class Mysqliteopenhelper extends SQLiteOpenHelper {
     }
 
     // Add user (student from register/vendor from admin)
-    public long addUser(User user){
-        SQLiteDatabase db=getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-
-        contentValues.put("username", user.getUsername());
-        contentValues.put("password", user.getPassword());
-        contentValues.put("name", user.getName());
-        contentValues.put("type", user.getType());
-        contentValues.put("balance", user.getBalance());
-
-        return db.insert("Users",null, contentValues);
+    public long addUser(User user) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("username", user.getUsername());
+        values.put("password", user.getPassword());
+        values.put("name", user.getName());
+        values.put("type", user.getType());
+        values.put("balance", user.getBalance());
+        values.put("wallet_address", user.getWalletAddress());
+        return db.insert("Users", null, values);
     }
 
     // login
